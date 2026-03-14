@@ -1,0 +1,6 @@
+bindsym $mod+l exec swaylock --image $HOME/.config/sway/swaylock.jpg --scaling fill
+
+
+exec swayidle -w \
+    timeout 300 'swaylock -f --image $HOME/.config/sway/swaylock.jpg --scaling fill' \
+    before-sleep 'swaylock -f --image $HOME/.config/sway/swaylock.jpg --scaling fill'
