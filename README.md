@@ -1,0 +1,1 @@
+```sudo pacman -S swayfx thunar alacritty fuzzel nvim nwg-drawer nwg-look waybar zeditor grim autotiling pipewire flatpak ttf-jetbrains-mono-nerd vlc firefox gamescope github-cli greetd drawing discord steam```
