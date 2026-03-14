@@ -1,0 +1,53 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run `zed: open default settings` from the
+// command palette (cmd-shift-p / ctrl-shift-p)
+{
+  "disable_ai": true,
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false,
+  },
+  "colorize_brackets": true,
+  "base_keymap": "VSCode",
+  "vim_mode": false,
+  "icon_theme": {
+    "mode": "dark",
+    "light": "Zed (Default)",
+    "dark": "Warm Charmed Icons",
+  },
+  "ui_font_size": 16,
+  "buffer_font_size": 15,
+  "theme": {
+    "mode": "dark",
+    "light": "One Dark",
+    "dark": "Carbonfox",
+  },
+  "tab_bar": {
+    "show": false,
+  },
+  "toolbar": {
+    "quick_actions": false,
+  },
+  "scrollbar": {
+    "show": "auto",
+  },
+  "gutter": {
+    "runnables": false,
+  },
+  "indent_guides": {
+    "enabled": true,
+    "line_width": 1,
+    "active_line_width": 1,
+    "coloring": "fixed",
+    "background_coloring": "disabled",
+  },
+  "experimental.theme_overrides": {
+    "editor.indent_guide": "#ffffff10",
+    "editor.indent_guide_active": "#38bdf8",
+  },
+}
