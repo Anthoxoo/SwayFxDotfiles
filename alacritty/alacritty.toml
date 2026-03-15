@@ -2,6 +2,10 @@
 opacity = 0.9
 
 
+[window.padding]
+x = 12
+y = 12
+
 [general]
 import = [
     "~/.config/alacritty/themes/themes/{doom_one}.toml"
