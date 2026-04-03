@@ -7,6 +7,30 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+  "ssh_connections": [
+    {
+      "host": "192.168.1.101",
+      "args": [],
+      "projects": [
+        {
+          "paths": [
+            "/home/antoine/Dev/python/./"
+          ]
+        },
+        {
+          "paths": [
+            "/home/antoine/Dev/zero_to_prod_backend_rust"
+          ]
+        },
+        {
+          "paths": [
+            "/home/antoine/Documents/Fac/Projet_Info/Atelier2/./"
+          ]
+        }
+      ],
+      "nickname": "Laptop fedora"
+    }
+  ],
   "disable_ai": true,
   "telemetry": {
     "diagnostics": false,
@@ -25,7 +49,7 @@
   "theme": {
     "mode": "dark",
     "light": "One Dark",
-    "dark": "Carbonfox",
+    "dark": "Nord Dark",
   },
   "tab_bar": {
     "show": false,
