@@ -1,7 +1,10 @@
 input type:keyboard {
 	xkb_layout fr
 }
-
+input type:pointer {
+    pointer_accel -0.2
+    accel_profile "flat"
+}
 # idek mane
 exec --no-startup-id dbus-update-activation-environment --all
 exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
