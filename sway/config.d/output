@@ -22,3 +22,5 @@ output HDMI-A-1 bg /home/antoine/.config/walls/lightstation.png fill resolution 
 
 workspace 1 output DP-2
 workspace 2 output HDMI-A-1
+
+focus output DP-2
