@@ -54,6 +54,7 @@ set $file-manager thunar
     # Reload the configuration file
     bindsym $mod+Shift+c reload
 
+    bindsym $mod+s exec obsidian
 
 #resize mode
 mode "resize" {
