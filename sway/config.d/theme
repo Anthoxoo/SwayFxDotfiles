@@ -2,7 +2,7 @@
 exec_always ~/.config/sway/scripts/import-gsettings
 
 #SwayFX settings
-corner_radius 10
+corner_radius 0
 blur_radius 6
 blur_passes 3
 blur enable
