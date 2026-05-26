@@ -35,6 +35,12 @@ client.urgent           #E67E80 #FF5555 #F8F8F2 #FF5555   #FF5555
 client.placeholder      #282A36 #282A36 #F8F8F2 #282A36   #282A36
 client.background       #F8F8F2
 
+# cursor
+seat seat0 xcursor_theme breeze_cursors 24
+
+exec_always export XCURSOR_THEME=breeze_cursors
+exec_always export XCURSOR_SIZE=24
+
 #
 # Status Bar:
 #
