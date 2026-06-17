@@ -14,6 +14,14 @@ input * {
     xkb_layout "fr
 }
 
+
+
+# Restreint la tablette gérée par OpenTabletDriver à l'écran DP-2
+input "OpenTabletDriver Virtual Tablet" {
+    map_to_output DP-2
+    accel_profile flat
+}
+
 # # Toggle between keyboard layouts. This example has the "us" and "gb"
 # # keyboard layouts, and uses Alt+Shift to toggle between them.
 # input "type:keyboard" {
