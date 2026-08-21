@@ -1,5 +1,8 @@
+/* WAYBAR CONFIG COLORS */
+
+
 * {
-    color: #d0dacc;
+    color: #dcd7ba;
     border: none;
     border-radius: 0;
     font-family: monospace, monospace;
@@ -13,79 +16,78 @@
 
 window#waybar {
     background: transparent;
-    color: #d0dacc;
+    color: white;
 }
 
 tooltip {
-    background: rgba(15, 26, 40, 0.9);
-    border: 1px solid rgba(70, 158, 168, 0.5);
+    background: rgba(43, 48, 59, 0.5);
+    border: 1px solid rgba(100, 114, 125, 0.5);
 }
 
 tooltip label {
-    color: #d0dacc;
+    color: white;
 }
 
 #workspaces button {
     padding: 0 5px;
     background: transparent;
-    color: #d0dacc;
+    color: #dcd7ba;
 }
 
 #workspaces button.focused {
-    background-color: #3A8B60;
+    background-color: #dcd7ba;
     border-radius: 3px;
 }
 
-#workspaces button.focused label,
-#workspaces button.focused {
-    color: #0F1A28;
+#workspaces button.focused label {
+    color: rgb(31, 31, 40);
 }
 
 .modules-left {
     border-radius: 5px;
-    background-color: rgba(15, 26, 40, 0.9);
+    background-color: rgba(31, 31, 40, 0.9);
     padding-left: 11px;
     padding-right: 11px;
 }
 
 .modules-center {
     border-radius: 5px;
-    background-color: rgba(15, 26, 40, 0.9);
+    background-color: rgba(31, 31, 40, 0.9);
     padding-left: 11px;
     padding-right: 11px;
 }
 
 .modules-right {
     border-radius: 5px;
-    background-color: rgba(15, 26, 40, 0.9);
+    background-color: rgba(31, 31, 40, 0.9);
     padding-left: 11px;
     padding-right: 11px;
 }
 
 #mode {
-    background: #1F72AB;
-    border-bottom: 3px solid #d0dacc;
+    background: #64727d;
+    border-bottom: 3px solid white;
 }
 
 #clock {
-    color: #d0dacc;
+    color: #dcd7ba;
 }
 
 #battery {
-    color: #d0dacc;
+    color: #dcd7ba;
 }
 
 #battery.charging {
-    color: #A2BA60;
+    color: #83c092;
 }
 
 @keyframes blink {
     to {
-        background-color: #d0dacc;
-        color: #0F1A28;
+        background-color: #ffffff;
+        color: black;
     }
 }
 
 #battery.warning:not(.charging) {
-    color: #B16196;
+    color: #e69875;
 }
