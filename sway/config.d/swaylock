@@ -1,6 +1,6 @@
-bindsym $mod+l exec swaylock --image $HOME/.config/walls/porco-rosso-wallpaper-red-plane.jpg --scaling fill
+bindsym $mod+l exec swaylock --image $HOME/.config/walls/red-ish/porco-rosso-wallpaper-red-plane.jpg --scaling fill
 
 
 exec swayidle -w \
-    timeout 1800 'swaylock -f --image $HOME/.config/walls/porco-rosso-wallpaper-red-plane.jpg --scaling fill' \
-    before-sleep 'swaylock -f --image $HOME/.config/walls/porco-rosso-wallpaper-red-plane.jpg --scaling fill'
+    timeout 1800 'swaylock -f --image $HOME/.config/walls/green-nature/porco-rosso-wallpaper-red-plane.jpg --scaling fill' \
+    before-sleep 'swaylock -f --image $HOME/.config/walls/green-nature/porco-rosso-wallpaper-red-plane.jpg --scaling fill'
