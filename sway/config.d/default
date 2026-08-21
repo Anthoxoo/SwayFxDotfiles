@@ -25,7 +25,7 @@ set $code-editor zeditor
 set $browser zen-browser
 
 # File manager
-set $file-manager thunar
+set $file-manager nautilus
 
 ### Key bindings
 #

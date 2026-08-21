@@ -6,7 +6,17 @@
 // To see all of Zed's default settings without changing your
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
+
 {
+  "lsp": {
+    "qml": {
+      "binary": {
+        "path": "/usr/sbin/qmlls6",
+        "arguments": ["-E"]
+      }
+    }
+  },
+
   "cli_default_open_behavior": "existing_window",
   "project_panel": {
     "dock": "left",
@@ -72,7 +82,7 @@
   "theme": {
     "mode": "dark",
     "light": "One Dark",
-    "dark": "Zedokai Darker (Filter Spectrum)",
+    "dark": "Terafox - opaque",
   },
   "tab_bar": {
     "show": false,
