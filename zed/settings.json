@@ -8,32 +8,57 @@
 // command palette (cmd-shift-p / ctrl-shift-p)
 
 {
+  "inlay_hints": {
+    "enabled": true
+  },
+  "terminal": {
+    "font_family": "JetBrainsMono Nerd Font"
+  },
   "lsp": {
     "qml": {
       "binary": {
         "path": "/usr/sbin/qmlls6",
         "arguments": ["-E"]
       }
+    },
+    "rust-analyzer": {
+      "initialization_options": {
+        "inlayHints": {
+          "maxLength": null,
+          "typeHints": {
+            "enable": true
+          },
+          "parameterHints": {
+            "enable": true
+          },
+          "lifetimeElisionHints": {
+            "enable": "skip_trivial",
+            "useParameterNames": true
+          },
+          "closureReturnTypeHints": {
+            "enable": "always"
+          }
+        }
+      }
     }
   },
-
   "cli_default_open_behavior": "existing_window",
   "project_panel": {
-    "dock": "left",
+    "dock": "left"
   },
   "outline_panel": {
-    "dock": "left",
+    "dock": "left"
   },
   "collaboration_panel": {
-    "dock": "left",
+    "dock": "left"
   },
   "agent": {
     "dock": "right",
     "favorite_models": [],
-    "model_parameters": [],
+    "model_parameters": []
   },
   "git_panel": {
-    "dock": "left",
+    "dock": "left"
   },
   "session": {
     "trust_all_worktrees": true
@@ -67,7 +92,7 @@
   "disable_ai": true,
   "telemetry": {
     "diagnostics": false,
-    "metrics": false,
+    "metrics": false
   },
   "colorize_brackets": true,
   "base_keymap": "VSCode",
@@ -75,39 +100,40 @@
   "icon_theme": {
     "mode": "dark",
     "light": "Zed (Default)",
-    "dark": "Warm Charmed Icons",
+    "dark": "Warm Charmed Icons"
   },
   "ui_font_size": 16,
   "buffer_font_size": 15,
   "theme": {
     "mode": "dark",
     "light": "One Dark",
-    "dark": "Terafox - opaque",
+    "dark": "One Dark Pro"
   },
   "tab_bar": {
-    "show": false,
+    "show": false
   },
   "toolbar": {
-    "quick_actions": false,
+    "quick_actions": false
   },
   "scrollbar": {
-    "show": "auto",
+    "show": "auto"
   },
   "gutter": {
-    "runnables": false,
+    "runnables": false
   },
   "indent_guides": {
     "enabled": true,
     "line_width": 1,
     "active_line_width": 1,
     "coloring": "fixed",
-    "background_coloring": "disabled",
+    "background_coloring": "disabled"
   },
   "experimental.theme_overrides": {
     "editor.indent_guide": "#ffffff10",
-    "editor.indent_guide_active": "#38bdf8",
+    "editor.indent_guide_active": "#38bdf8"
   },
   "title_bar": {
-    "show_user_picture": false,
-  },
+    "show_user_picture": false
+  }
 }
+
