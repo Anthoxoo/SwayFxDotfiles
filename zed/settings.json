@@ -24,19 +24,23 @@
     "rust-analyzer": {
       "initialization_options": {
         "inlayHints": {
-          "maxLength": null,
+          "maxLength": 25,
           "typeHints": {
-            "enable": true
+            "enable": true,
+            "hideNamedConstructor": true,
+            "hideClosureInitialization": true
           },
           "parameterHints": {
-            "enable": true
+            "enable": false
+          },
+          "chainingHints": {
+            "enable": false
           },
           "lifetimeElisionHints": {
-            "enable": "skip_trivial",
-            "useParameterNames": true
+            "enable": "never"
           },
           "closureReturnTypeHints": {
-            "enable": "always"
+            "enable": "with_block"
           }
         }
       }
@@ -96,7 +100,7 @@
   },
   "colorize_brackets": true,
   "base_keymap": "VSCode",
-  "vim_mode": false,
+  "vim_mode": true,
   "icon_theme": {
     "mode": "dark",
     "light": "Zed (Default)",
@@ -107,7 +111,7 @@
   "theme": {
     "mode": "dark",
     "light": "One Dark",
-    "dark": "One Dark Pro"
+    "dark": "New Darcula Darker"
   },
   "tab_bar": {
     "show": false
@@ -130,7 +134,13 @@
   },
   "experimental.theme_overrides": {
     "editor.indent_guide": "#ffffff10",
-    "editor.indent_guide_active": "#38bdf8"
+    "editor.indent_guide_active": "#38bdf8",
+    "syntax": {
+          "hint": {
+            "color": "#5c7582",
+            "font_style": "italic"
+          }
+        }
   },
   "title_bar": {
     "show_user_picture": false
