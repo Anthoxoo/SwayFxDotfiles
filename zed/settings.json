@@ -111,7 +111,7 @@
   "theme": {
     "mode": "dark",
     "light": "One Dark",
-    "dark": "New Darcula Darker"
+    "dark": "Discord Dark"
   },
   "tab_bar": {
     "show": false
@@ -146,4 +146,3 @@
     "show_user_picture": false
   }
 }
-
