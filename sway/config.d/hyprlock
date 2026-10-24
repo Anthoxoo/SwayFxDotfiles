@@ -1,0 +1,7 @@
+# Verrouillage de l'écran avec hyprlock
+bindsym $mod+l exec pidof hyprlock || hyprlock
+
+# Verrouillage automatique après 30 minutes d'inactivité et avant la mise en veille
+exec swayidle -w \
+    timeout 1800 'pidof hyprlock || hyprlock' \
+    before-sleep 'pidof hyprlock || hyprlock'

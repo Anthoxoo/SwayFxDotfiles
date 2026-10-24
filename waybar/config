@@ -34,10 +34,8 @@
         "max-length": 55,
         "tooltip": false,
         "rewrite": {
-            ".*>>>(.*) [—-] Mozilla Firefox.*": "󰈹  Firefox — $1",
-            ".*>>>(.*) [—-] Firefox ESR.*": "󰈹  Firefox — $1",
-            ".*>>>Mozilla Firefox.*": "󰈹  Firefox",
-            ".*>>>Firefox ESR.*": "󰈹  Firefox",
+            ".*>>>(.+?)(?: — | - | \\| | : ).*Firefox.*": "󰈹  Firefox — $1",
+            ".*>>>(?:Mozilla )?Firefox.*": "󰈹  Firefox",
 
             ".*[Zz]ed.*>>>Zed$": "ζ Zed",
             ".*[Zz]ed.*>>>(.*)": "ζ  Zed — $1",
@@ -115,7 +113,7 @@
             "critical": 15
         },
         "format": "{icon} {capacity}%",
-        "format-charging": " {capacity}%",
+        "format-charging": "󰂄 {capacity}%",
         "format-plugged": " {capacity}%",
         "format-icons": ["", "", "", "", ""]
     },

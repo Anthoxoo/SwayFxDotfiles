@@ -113,7 +113,7 @@ window#waybar.empty #window {
 
 #battery.charging,
 #battery.plugged {
-    color: #98c379;
+    color: #ff8800;
 }
 
 #battery.warning:not(.charging) {

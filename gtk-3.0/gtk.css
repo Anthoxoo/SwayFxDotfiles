@@ -1,1 +1,46 @@
-@import 'colors.css';
+@define-color accent_color #ff8800;
+@define-color accent_bg_color #ff8800;
+@define-color accent_fg_color #141416;
+
+@define-color window_bg_color #141416;
+@define-color window_fg_color #e5e5e5;
+@define-color view_bg_color #141416;
+@define-color view_fg_color #e5e5e5;
+
+@define-color headerbar_bg_color #141416;
+@define-color headerbar_fg_color #e5e5e5;
+@define-color headerbar_border_color #2a2a2c;
+@define-color headerbar_backdrop_color #141416;
+
+@define-color sidebar_bg_color #19191c;
+@define-color sidebar_fg_color #e5e5e5;
+@define-color sidebar_backdrop_color #141416;
+@define-color secondary_sidebar_bg_color #19191c;
+@define-color secondary_sidebar_fg_color #e5e5e5;
+
+@define-color card_bg_color #1e1e20;
+@define-color card_fg_color #e5e5e5;
+@define-color dialog_bg_color #141416;
+@define-color dialog_fg_color #e5e5e5;
+@define-color popover_bg_color #19191c;
+@define-color popover_fg_color #e5e5e5;
+
+@define-color borders #2a2a2c;
+
+window,
+.background,
+headerbar,
+popover > contents,
+.card {
+    border-radius: 0px;
+}
+
+popover > contents {
+    border: 1px solid #ff8800;
+}
+
+.navigation-sidebar row:selected {
+    background-color: rgba(255, 136, 0, 0.18);
+    color: #ff8800;
+    border-left: 3px solid #ff8800;
+}
