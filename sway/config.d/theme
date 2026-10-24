@@ -28,14 +28,12 @@ for_window [shell="xdg_shell"] title_format "%title (%app_id)"
 for_window [shell="x_wayland"] title_format "%class - %title"
 
 # class                 border  bground text    indicator child_border
-client.focused          #3A8B60 #3A8B60 #3A8B60 #3A8B60   #3A8B60
-client.focused_inactive #4F555F #4F555F #F8F8F2 #4F555F   #4F555F
-client.unfocused        #16161D #16161D #BFBFBF #16161D   #16161D
-client.urgent           #E67E80 #FF5555 #F8F8F2 #FF5555   #FF5555
-client.placeholder      #282A36 #282A36 #F8F8F2 #282A36   #282A36
-client.background       #F8F8F2
-
-# cursor
+client.focused          #ff8800 #ff8800 #141416 #ff8800   #ff8800
+client.focused_inactive #2a2a2c #2a2a2c #e5e5e5 #2a2a2c   #2a2a2c
+client.unfocused        #141416 #141416 #888888 #141416   #141416
+client.urgent           #e05252 #e05252 #141416 #e05252   #e05252
+client.placeholder      #141416 #141416 #e5e5e5 #141416   #141416
+client.background       #141416# cursor
 seat seat0 xcursor_theme breeze_cursors 24
 
 exec_always export XCURSOR_THEME=breeze_cursors

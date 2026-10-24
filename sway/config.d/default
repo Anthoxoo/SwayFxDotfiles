@@ -13,16 +13,14 @@ set $term alacritty
 # Application launcher
 set $launcher fuzzel
 
-# Application menu
-set $menu nwg-drawer
-
 # Power Menu
 set $powermenu ~/.config/sway/scripts/power_menu.sh
 # Code Editor
-set $code-editor zeditor
+
+set $code-editor zed
 
 # Prefered Browser
-set $browser zen-browser
+set $browser firefox
 
 # File manager
 set $file-manager nautilus
@@ -139,38 +137,14 @@ bindsym $mod+r mode "resize"
 #
 # Layout stuff:
 #
-    # Set how the current window will be split
-    # Split the window vertically
-    #bindsym $mod+v splitv
-    # Split the window horizontally
-    #bindsym $mod+b splith
 
-    # Switch the current container between different layout styles
-    #bindsym $mod+s layout stacking
-    #bindsym $mod+w layout tabbed
-    #bindsym $mod+e layout toggle split
+    exec_always autotiling
 
     # Make the current focus fullscreen
     bindsym $mod+f fullscreen
 
     # Toggle between tiling and floating mode
-    bindsym $mod+Shift+space floating toggle
-
-    # Swap focus between the tiling area and the floating area
-    bindsym $mod+space focus mode_toggle
-
-#
-# Scratchpad:
-#
-    # Sway has a "scratchpad", which is a bag of holding for windows.
-    # You can send windows there and get them back later.
-
-    # Move the currently focused window to the scratchpad
-    bindsym $mod+Shift+minus move scratchpad
-
-    # Show the next scratchpad window or hide the focused scratchpad window.
-    # If there are multiple scratchpad windows, this command cycles through them.
-    bindsym $mod+minus scratchpad show
+    bindsym $mod+space floating toggle
 
 #
 # Resizing containers:

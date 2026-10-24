@@ -6,8 +6,6 @@ input type:pointer {
     accel_profile "flat"
 }
 # idek mane
-exec --no-startup-id dbus-update-activation-environment --all
-exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
 
 exec swaymsg reload
 
@@ -31,3 +29,4 @@ exec_always {
 #BORDERS
 gaps inner 5
 gaps outer 5
+exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway SWAYSOCK
