@@ -1,0 +1,7 @@
+[SddmGreeterTheme]
+Name=Omarchy
+Description=Minimalist Anthracite and Orange Theme
+Author=Anthoxoo
+Version=1.0
+MainScript=Main.qml
+QtVersion=6
