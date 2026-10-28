@@ -64,7 +64,7 @@ Rectangle {
         color: "#8a8a8d"
         font.family: "JetBrainsMono Nerd Font"
         font.pixelSize: 13
-        text: "󰌾  " + userModel.lastUser
+        text: userModel.lastUser
     }
 
     Rectangle {
