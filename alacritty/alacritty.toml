@@ -1,17 +1,54 @@
+[env]
+TERM = "xterm-256color"
+
 [window]
-opacity = 0.9
+padding = { x = 12, y = 12 }
+dynamic_padding = true
+opacity = 0.92
+decorations = "none"
 
-
-[window.padding]
-x = 12
-y = 12
-
-[general]
-import = [
-    "~/.config/alacritty/themes/themes/{doom_one}.toml"
-]
-
+[scrolling]
+history = 10000
 
 [font]
-size = 12.0
-normal = { family = "JetBrainsMono Nerd Font", style = "Regular" }
+size = 11.0
+
+[font.normal]
+family = "JetBrainsMono Nerd Font"
+style = "Regular"
+
+[font.bold]
+family = "JetBrainsMono Nerd Font"
+style = "Bold"
+
+[font.italic]
+family = "JetBrainsMono Nerd Font"
+style = "Italic"
+
+[colors.primary]
+background = "#141416"
+foreground = "#e5e5e5"
+
+[colors.cursor]
+text = "#141416"
+cursor = "#ff8800"
+
+[colors.normal]
+black = "#1e1e20"
+red = "#e05252"
+green = "#78b159"
+yellow = "#ffaa33"
+blue = "#4a90e2"
+magenta = "#b48ead"
+cyan = "#88c0d0"
+white = "#e5e5e5"
+
+[colors.bright]
+black = "#3b3b3f"
+red = "#e05252"
+green = "#78b159"
+yellow = "#ff8800"
+blue = "#4a90e2"
+magenta = "#b48ead"
+cyan = "#88c0d0"
+white = "#ffffff"

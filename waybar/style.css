@@ -67,6 +67,10 @@ tooltip label {
     color: #141416;
 }
 
+#workspaces button.urgent label {
+    color: #141416;
+}
+
 #window {
     font-size: 12px;
     color: #9a9a9e;
@@ -89,6 +93,7 @@ window#waybar.empty #window {
 }
 
 #clock,
+#mpris,
 #bluetooth,
 #backlight,
 #pulseaudio,
@@ -101,10 +106,34 @@ window#waybar.empty #window {
 #clock {
     color: #e5e5e5;
     font-weight: bold;
+    border-bottom: 2px solid #ff8800;
 }
 
-#bluetooth.connected {
+#mpris {
+    font-size: 12px;
+    color: #e5e5e5;
+    padding: 0 10px;
+    border-bottom: 2px solid #ff8800;
+}
+
+#mpris.paused {
+    color: #888888;
+    border-bottom: 2px solid #2e2e32;
+}
+
+#clock:hover,
+#mpris:hover,
+#bluetooth:hover,
+#backlight:hover,
+#pulseaudio:hover,
+#battery:hover,
+#custom-power:hover {
     color: #ff8800;
+}
+
+/* Le Bluetooth reste blanc/neutre même connecté */
+#bluetooth {
+    color: #e5e5e5;
 }
 
 #pulseaudio.muted {
