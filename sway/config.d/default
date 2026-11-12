@@ -10,13 +10,13 @@ set $right l
 # Set default terminal emulator
 set $term alacritty
 
-# Application launcher
-set $launcher fuzzel
+# Application launcher (Quickshell)
+set $launcher ~/.config/quickshell/scripts/toggle-launcher.sh
 
-# Power Menu
-set $powermenu ~/.config/sway/scripts/power_menu.sh
+# Power Menu (Quickshell)
+set $powermenu ~/.config/quickshell/scripts/toggle-power.sh
+
 # Code Editor
-
 set $code-editor zed
 
 # Prefered Browser
@@ -44,9 +44,14 @@ set $file-manager nautilus
     # Activities
     bindsym $mod+p exec ~/.config/sway/scripts/window_switcher.sh
 
+    # Quickshell TUI shortcuts (Wi-Fi, Bluetooth, Audio, Battery)
+    bindsym $mod+Shift+w exec ~/.config/quickshell/scripts/toggle-wifi.sh
+    bindsym $mod+Shift+b exec ~/.config/quickshell/scripts/toggle-bt.sh
+    bindsym $mod+Shift+v exec ~/.config/quickshell/scripts/toggle-audio.sh
+    bindsym $mod+Shift+p exec ~/.config/quickshell/scripts/toggle-battery.sh
+
     # Move windows by holding down $mod and left mouse button.
     # Resize them with right mouse button + $mod.
-    # Change "normal" to "inverse" to switch left and right
     floating_modifier $mod normal
 
     # Reload the configuration file
@@ -56,22 +61,16 @@ set $file-manager nautilus
 
 #resize mode
 mode "resize" {
-    # left will shrink the containers width
-    # right will grow the containers width
-    # up will shrink the containers height
-    # down will grow the containers height
     bindsym $left resize shrink width 10px
     bindsym $down resize grow height 10px
     bindsym $up resize shrink height 10px
     bindsym $right resize grow width 10px
 
-    # Ditto, with arrow keys
     bindsym Left resize shrink width 10px
     bindsym Down resize grow height 10px
     bindsym Up resize shrink height 10px
     bindsym Right resize grow width 10px
 
-    # Return to default mode
     bindsym Return mode "default"
     bindsym Escape mode "default"
 }
@@ -86,6 +85,7 @@ bindsym $mod+r mode "resize"
         $mod+Down focus down
         $mod+Up focus up
         $mod+Right focus right
+        # Vim key support
 
         # Move the focused window
         $mod+Shift+Left move left
@@ -102,10 +102,6 @@ bindsym $mod+r mode "resize"
 #
 # Workspaces:
 #
-    # Workspace bindings are using bindcode instead of bindsym for better Azerty compatibility.
-    # https://github.com/EndeavourOS-Community-Editions/sway/pull/81
-    # Use wev to find keycodes for setting up other bindings this way.
-
     bindcode {
         # Switch to workspace
         $mod+10 workspace number 1
@@ -131,13 +127,10 @@ bindsym $mod+r mode "resize"
         $mod+Shift+18 move container to workspace number 9
         $mod+Shift+19 move container to workspace number 10
     }
-    # Note: workspaces can have any name you want, not just numbers.
-    # We just use 1-10 as the default.
 
 #
 # Layout stuff:
 #
-
     exec_always autotiling
 
     # Make the current focus fullscreen
@@ -164,10 +157,8 @@ bindsym $mod+r mode "resize"
 
     # Resize floating windows with mouse scroll:
     bindsym --whole-window --border {
-        # Resize vertically
         $mod+button4 resize shrink height 5 px or 5 ppt
         $mod+button5 resize grow height 5 px or 5 ppt
-        # Resize horizontally
         $mod+Shift+button4 resize shrink width 5 px or 5 ppt
         $mod+Shift+button5 resize grow width 5 px or 5 ppt
     }
@@ -177,9 +168,9 @@ bindsym $mod+r mode "resize"
 #
     bindsym {
         # Volume
-        XF86AudioRaiseVolume exec pamixer -ui 2
-        XF86AudioLowerVolume exec pamixer -ud 2
-        XF86AudioMute exec pamixer --toggle-mute
+        XF86AudioRaiseVolume exec pamixer -ui 2 && ~/.config/quickshell/scripts/status_refresh.sh
+        XF86AudioLowerVolume exec pamixer -ud 2 && ~/.config/quickshell/scripts/status_refresh.sh
+        XF86AudioMute exec pamixer --toggle-mute && ~/.config/quickshell/scripts/status_refresh.sh
 
         # Player
         XF86AudioPlay exec playerctl play-pause
@@ -187,8 +178,8 @@ bindsym $mod+r mode "resize"
         XF86AudioPrev exec playerctl previous
 
         # Backlight
-        XF86MonBrightnessUp exec brightnessctl -c backlight set +5%
-        XF86MonBrightnessDown exec brightnessctl -c backlight set 5%-
+        XF86MonBrightnessUp exec ~/.config/quickshell/scripts/brightness.sh up 5
+        XF86MonBrightnessDown exec ~/.config/quickshell/scripts/brightness.sh down 5
     }
 
 #
@@ -212,3 +203,7 @@ bindsym $mod+r mode "resize"
     bindsym Ctrl+Print exec ~/.config/sway/scripts/screenshot_window.sh
     # Screenshot the current display and pipe to swappy
     bindsym Shift+Print exec ~/.config/sway/scripts/screenshot_display.sh
+
+# Notifications Quickshell (fermer tout / mode Ne pas déranger)
+bindsym $mod+n exec ~/.config/quickshell/scripts/notif-ctl.sh clear-notifs
+bindsym $mod+Shift+n exec ~/.config/quickshell/scripts/notif-ctl.sh toggle-dnd

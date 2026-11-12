@@ -30,3 +30,16 @@ exec_always {
 gaps inner 5
 gaps outer 5
 exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway SWAYSOCK
+
+# Fenêtre flottante Omarchy Wi-Fi TUI
+for_window [app_id="omarchy-wifi"] floating enable, resize set 920 620, move position center, border pixel 1
+
+# Barre Quickshell
+
+# Fenêtres flottantes Omarchy Bluetooth & Batterie
+for_window [app_id="omarchy-bt"] floating enable, resize set 860 560, move position center, border pixel 1
+for_window [app_id="omarchy-battery"] floating enable, resize set 760 480, move position center, border pixel 1
+for_window [app_id="omarchy-audio"] floating enable, resize set 760 480, move position center, border pixel 1
+
+# Quickshell Desktop Shell
+exec_always ~/.config/quickshell/scripts/start-quickshell.sh

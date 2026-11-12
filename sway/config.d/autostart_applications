@@ -13,7 +13,7 @@ exec swayidle idlehint 1
 exec_always swayidle -w before-sleep "gtklock -d"
 
 # Desktop notifications
-exec mako
+# exec mako
 
 # Autotiling
 exec autotiling
