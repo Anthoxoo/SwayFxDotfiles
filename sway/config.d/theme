@@ -1,31 +1,42 @@
-# Apply gtk theming
-exec_always ~/.config/sway/scripts/import-gsettings
-
-#SwayFX settings
-corner_radius 0
-blur_radius 6
-blur_passes 3
-blur enable
-
-layer_effects "waybar" {
-  blur enable;
-  blur radius 3;
-  blur_passes 1;
+# GTK / icônes / curseur — une seule source (avant : import-gsettings ET un 2e bloc se marchaient dessus)
+exec_always {
+    gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita'
+    gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+    gsettings set org.gnome.desktop.interface icon-theme 'Papirus'
+    gsettings set org.gnome.desktop.interface cursor-theme 'breeze_cursors'
+    gsettings set org.gnome.desktop.interface cursor-size 24
+    gsettings set org.gnome.desktop.interface font-name 'Noto Sans 10'
 }
 
-# Set inner/outer gaps
-gaps inner 4
-gaps outer 4
+# Curseur
+seat seat0 xcursor_theme breeze_cursors 24
 
-# Hide titlebar on windows:
+# SwayFX
+corner_radius 0
+blur enable
+blur_radius 6
+blur_passes 3
+
+# Flou sous la barre Quickshell (namespace défini dans modules/Bar.qml)
+layer_effects "qs-bar" {
+    blur enable;
+    blur_ignore_transparent enable;
+}
+
+# Gaps (définis une seule fois)
+gaps inner 5
+gaps outer 5
+
+# Pas de barre de titre, bordure 1 px
 default_border pixel 1
+default_floating_border pixel 1
 
-# Default Font
-font pango:Jetbrain Nerd Font mono 12
+# Police (barres de titre / onglets)
+font pango:JetBrainsMono Nerd Font 12
 
 # Title format for windows
 for_window [shell="xdg_shell"] title_format "%title (%app_id)"
-for_window [shell="x_wayland"] title_format "%class - %title"
+for_window [shell="xwayland"] title_format "%class - %title"
 
 # class                 border  bground text    indicator child_border
 client.focused          #ff8800 #ff8800 #141416 #ff8800   #ff8800
@@ -33,13 +44,4 @@ client.focused_inactive #2a2a2c #2a2a2c #e5e5e5 #2a2a2c   #2a2a2c
 client.unfocused        #141416 #141416 #888888 #141416   #141416
 client.urgent           #e05252 #e05252 #141416 #e05252   #e05252
 client.placeholder      #141416 #141416 #e5e5e5 #141416   #141416
-client.background       #141416# cursor
-seat seat0 xcursor_theme breeze_cursors 24
-
-exec_always export XCURSOR_THEME=breeze_cursors
-exec_always export XCURSOR_SIZE=24
-
-#
-# Status Bar:
-#
-# Read `man 5 sway-bar` for more information about this section.
+client.background       #141416

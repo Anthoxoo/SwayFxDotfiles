@@ -16,11 +16,16 @@
 #   input "1386:884:Wacom_Intuos_S_Pad" map_to_output HDMI-A-1
 #   input "1386:884:Wacom_Intuos_S_Pen" map_to_output HDMI-A-1
 
-#output DP-2 position 1920 0 bg $HOME/.config/walls/ fill resolution 1920x1080@165Hz
-output eDP-1 position 0 0 bg $HOME/.config/walls/yellow-orange-ish/wall_secondary.png fill resolution 1920x1080@180Hz
-output HDMI-A-2 position 1920 0 bg $HOME/.config/walls/yellow-orange-ish/wall_secondary.png fill resolution 1920x1080@60hz
+#output DP-2 position 1920 0 resolution 1920x1080@165Hz
+# Pas de fréquence imposée : sway choisit la plus haute disponible (60 Hz ici, 180 Hz si la dalle l'expose)
+output eDP-1 position 0 0 resolution 1920x1080
+output HDMI-A-2 position 1920 0 resolution 1920x1080@60Hz
 
 #workspace 1 output DP-2
 #workspace 2 output HDMI-A-1
+
+# Fond d'écran : dessiné par Quickshell (modules/Wallpaper.qml), plus de swaybg.
+swaybg_command -
+#   Super+Ctrl+Espace = suivant, Super+Ctrl+Shift+Espace = précédent
 
 focus output eDP-1

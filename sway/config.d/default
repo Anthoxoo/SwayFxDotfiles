@@ -19,7 +19,7 @@ set $powermenu ~/.config/quickshell/scripts/toggle-power.sh
 # Code Editor
 set $code-editor zed
 
-# Prefered Browser
+# Preferred Browser
 set $browser firefox
 
 # File manager
@@ -44,11 +44,13 @@ set $file-manager nautilus
     # Activities
     bindsym $mod+p exec ~/.config/sway/scripts/window_switcher.sh
 
-    # Quickshell TUI shortcuts (Wi-Fi, Bluetooth, Audio, Battery)
+    # Quickshell panels & TUI shortcuts
     bindsym $mod+Shift+w exec ~/.config/quickshell/scripts/toggle-wifi.sh
     bindsym $mod+Shift+b exec ~/.config/quickshell/scripts/toggle-bt.sh
+    bindsym $mod+Shift+a exec ~/.config/quickshell/scripts/toggle-pods.sh
     bindsym $mod+Shift+v exec ~/.config/quickshell/scripts/toggle-audio.sh
     bindsym $mod+Shift+p exec ~/.config/quickshell/scripts/toggle-battery.sh
+    bindsym $mod+Shift+m exec ~/.config/quickshell/scripts/toggle-monitors.sh
 
     # Move windows by holding down $mod and left mouse button.
     # Resize them with right mouse button + $mod.
@@ -57,9 +59,10 @@ set $file-manager nautilus
     # Reload the configuration file
     bindsym $mod+Shift+c reload
 
-    bindsym $mod+s exec obsidian
+    # Launch Obsidian
+    bindsym $mod+s exec flatpak run md.obsidian.Obsidian
 
-#resize mode
+# Resize mode
 mode "resize" {
     bindsym $left resize shrink width 10px
     bindsym $down resize grow height 10px
@@ -85,13 +88,13 @@ bindsym $mod+r mode "resize"
         $mod+Down focus down
         $mod+Up focus up
         $mod+Right focus right
-        # Vim key support
 
         # Move the focused window
         $mod+Shift+Left move left
         $mod+Shift+Down move down
         $mod+Shift+Up move up
         $mod+Shift+Right move right
+
         # Vim key support
         $mod+Shift+$left move left
         $mod+Shift+$down move down
@@ -131,7 +134,7 @@ bindsym $mod+r mode "resize"
 #
 # Layout stuff:
 #
-    exec_always autotiling
+    # (autotiling est lancé une seule fois dans autostart_applications)
 
     # Make the current focus fullscreen
     bindsym $mod+f fullscreen
@@ -148,6 +151,7 @@ bindsym $mod+r mode "resize"
         $mod+ctrl+Up resize grow height 10 px
         $mod+ctrl+Down resize shrink height 10 px
         $mod+ctrl+Left resize grow width 10 px
+
         # Resize with Vim keys
         $mod+ctrl+$right resize shrink width 10 px
         $mod+ctrl+$up resize grow height 10 px
@@ -164,9 +168,10 @@ bindsym $mod+r mode "resize"
     }
 
 #
-# Media Keys
+# Media Keys:
 #
-    bindsym {
+    # --locked : ces touches restent actives écran verrouillé
+    bindsym --locked {
         # Volume
         XF86AudioRaiseVolume exec ~/.config/quickshell/scripts/volume.sh up 2
         XF86AudioLowerVolume exec ~/.config/quickshell/scripts/volume.sh down 2
@@ -183,7 +188,7 @@ bindsym $mod+r mode "resize"
     }
 
 #
-# App shortcuts
+# App shortcuts:
 #
     # Launch the file explorer
     bindsym $mod+e exec $file-manager
@@ -195,15 +200,32 @@ bindsym $mod+r mode "resize"
     bindsym $mod+v exec $code-editor
 
 #
-# Screenshots
+# Screenshots:
 #
-    # Snip a selection and pipe to swappy
-    bindsym print exec grim -g "$(slurp)" - | swappy -f -
-    # Screenshot a window and pipe to swappy
-    bindsym Ctrl+Print exec ~/.config/sway/scripts/screenshot_window.sh
-    # Screenshot the current display and pipe to swappy
-    bindsym Shift+Print exec ~/.config/sway/scripts/screenshot_display.sh
+    # Tout est enregistré dans ~/Pictures/Screenshots et copié dans le presse-papiers
+    # Zone (+ annotation avec swappy s'il est installé)
+    bindsym Print exec ~/.config/sway/scripts/screenshot.sh region-edit
+    # Fenêtre
+    bindsym Ctrl+Print exec ~/.config/sway/scripts/screenshot.sh window
+    # Écran courant
+    bindsym Shift+Print exec ~/.config/sway/scripts/screenshot.sh output
+    # Zone, sans éditeur
+    bindsym $mod+Shift+s exec ~/.config/sway/scripts/screenshot.sh region
 
-# Notifications Quickshell (fermer tout / mode Ne pas déranger)
-bindsym $mod+n exec ~/.config/quickshell/scripts/notif-ctl.sh clear-notifs
-bindsym $mod+Shift+n exec ~/.config/quickshell/scripts/notif-ctl.sh toggle-dnd
+#
+# Fond d'écran (Quickshell) :
+#
+    bindsym $mod+Ctrl+space exec qs ipc call wallpaper next
+    bindsym $mod+Ctrl+Shift+space exec qs ipc call wallpaper prev
+
+#
+# Rappels (Quickshell) :
+#
+    bindsym $mod+Ctrl+r exec qs ipc call shell toggle reminder
+    bindsym $mod+Ctrl+Shift+r exec qs ipc call reminders clear
+
+#
+# Quickshell Notifications (dismiss all / Do Not Disturb):
+#
+    bindsym $mod+n exec ~/.config/quickshell/scripts/notif-ctl.sh clear-notifs
+    bindsym $mod+Shift+n exec ~/.config/quickshell/scripts/notif-ctl.sh toggle-dnd

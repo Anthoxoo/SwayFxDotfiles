@@ -32,11 +32,11 @@ Item {
         let tit = player.trackTitle || "-";
         let art = player.trackArtist || "-";
         let src = (player.identity || "player").toLowerCase();
-        return "<tt>"
-            + "<span style='color:#ff8800;'>" + iconStr + "  " + st + " (" + src + ")</span><br>"
-            + "<span style='color:#888888;'>title   </span><span style='color:#e5e5e5;'>" + tit + "</span><br>"
-            + "<span style='color:#888888;'>artist  </span><span style='color:#e5e5e5;'>" + art + "</span>"
-            + "</tt>";
+        return Theme.tipBlock([
+            Theme.tipTitle(iconStr + "  " + st + " (" + src + ")"),
+            Theme.tipRow("title", tit),
+            Theme.tipRow("artist", art)
+        ]);
     }
 
     Timer {

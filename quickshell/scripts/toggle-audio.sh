@@ -1,3 +1,2 @@
 #!/usr/bin/env bash
-FIFO="/tmp/quickshell-ipc.fifo"
-[ -p "$FIFO" ] && printf "toggle-audio\n" > "$FIFO" &
+exec qs ipc call shell toggle audio >/dev/null 2>&1

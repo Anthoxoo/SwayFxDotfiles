@@ -1,3 +1,2 @@
 #!/usr/bin/env bash
-FIFO="/tmp/quickshell-ipc.fifo"
-[ -p "$FIFO" ] && echo "refresh" > "$FIFO" &
+exec qs ipc call shell refresh >/dev/null 2>&1

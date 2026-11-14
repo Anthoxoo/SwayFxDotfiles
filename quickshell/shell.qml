@@ -3,6 +3,8 @@ import QtQuick
 import "./modules"
 
 ShellRoot {
+    Wallpaper {}
+
     Variants {
         model: Quickshell.screens
 
@@ -25,5 +27,6 @@ ShellRoot {
     BrightnessOsd {}
     AudioOsd {}
     Notifications {}
+    ReminderPopup {}
     LockScreen {}
 }

@@ -1,45 +1,11 @@
-input type:keyboard {
-	xkb_layout fr
-}
-input type:pointer {
-    pointer_accel -0.2
-    accel_profile "flat"
-}
-# idek mane
+# Sway (swayfx) — point d'entrée
+# Toute la configuration est découpée dans config.d/ (chargé par ordre alphabétique) :
+#   application_defaults   règles de fenêtres
+#   autostart_applications démons et services lancés au démarrage
+#   default                variables, raccourcis
+#   input                  clavier / souris / tablette
+#   lock                   verrouillage et mise en veille
+#   output                 écrans
+#   theme                  apparence (couleurs, gaps, swayfx, GTK)
 
-exec swaymsg reload
-
-#OUTPUTS
-include outputs
-include workspaces
-# user config directory
 include $HOME/.config/sway/config.d/*
-
-#SCREENSHOT
-bindsym Mod4+Shift+s exec grim -g "$(slurp)" - | tee "$HOME/Pictures/Screenshots"/"Screenshot_$(date +%Y%m%d-%H%M%S).png" | wl-copy
-
-#GTK THEMES
-set $gnome-schema org.gnome.desktop.interface
-
-exec_always {
-    gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita'
-    gsettings set org.gnome.desktop.interface icon-theme 'Papirus'
-}
-
-#BORDERS
-gaps inner 5
-gaps outer 5
-exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway SWAYSOCK
-
-# Fenêtre flottante Omarchy Wi-Fi TUI
-for_window [app_id="omarchy-wifi"] floating enable, resize set 920 620, move position center, border pixel 1
-
-# Barre Quickshell
-
-# Fenêtres flottantes Omarchy Bluetooth & Batterie
-for_window [app_id="omarchy-bt"] floating enable, resize set 860 560, move position center, border pixel 1
-for_window [app_id="omarchy-battery"] floating enable, resize set 760 480, move position center, border pixel 1
-for_window [app_id="omarchy-audio"] floating enable, resize set 760 480, move position center, border pixel 1
-
-# Quickshell Desktop Shell
-exec_always ~/.config/quickshell/scripts/start-quickshell.sh

@@ -409,7 +409,7 @@ PanelWindow {
                             Layout.fillWidth: true
                             Layout.preferredHeight: 22
                             radius: 0
-                            color: isCur ? Theme.hoverBg : (preMouse.containsMouse ? "#1b1b1e" : "transparent")
+                            color: isCur ? Theme.hoverBg : (preMouse.containsMouse ? Theme.rowHover : "transparent")
                             border.color: isCur ? Theme.accent : Theme.sep
                             border.width: 1
 
@@ -625,7 +625,7 @@ PanelWindow {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 24
                         radius: 0
-                        color: isCur ? Theme.hoverBg : (profMouse.containsMouse ? "#1b1b1e" : "transparent")
+                        color: isCur ? Theme.hoverBg : (profMouse.containsMouse ? Theme.rowHover : "transparent")
                         border.color: isCur ? Theme.accent : Theme.sep
                         border.width: 1
 

@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 ACTION="$1"
 VAL="${2:-2}"
-FIFO="/tmp/quickshell-ipc.fifo"
 
 if command -v pamixer >/dev/null 2>&1; then
     CUR=$(pamixer --get-volume 2>/dev/null || echo 0)
@@ -32,9 +31,7 @@ if [ "$ACTION" = "up" ]; then
         pactl set-sink-volume @DEFAULT_SINK@ "+${VAL}%"
         MUTED="false"
     fi
-    if [ -p "$FIFO" ]; then
-        printf "osd-audio:%d:%s\n" "$TARGET" "$MUTED" > "$FIFO" &
-    fi
+    qs ipc call shell osdAudio "$TARGET" "$MUTED" >/dev/null 2>&1 &
 elif [ "$ACTION" = "down" ]; then
     TARGET=$(( CUR - VAL ))
     [ "$TARGET" -lt 0 ] && TARGET=0
@@ -50,9 +47,7 @@ elif [ "$ACTION" = "down" ]; then
         pactl set-sink-volume @DEFAULT_SINK@ "-${VAL}%"
         MUTED="false"
     fi
-    if [ -p "$FIFO" ]; then
-        printf "osd-audio:%d:%s\n" "$TARGET" "$MUTED" > "$FIFO" &
-    fi
+    qs ipc call shell osdAudio "$TARGET" "$MUTED" >/dev/null 2>&1 &
 elif [ "$ACTION" = "mute" ]; then
     if command -v pamixer >/dev/null 2>&1; then
         pamixer --toggle-mute >/dev/null 2>&1
@@ -65,9 +60,7 @@ elif [ "$ACTION" = "mute" ]; then
         pactl set-sink-mute @DEFAULT_SINK@ toggle
         MUTED=$(pactl get-sink-mute @DEFAULT_SINK@ 2>/dev/null | grep -q "yes" && echo true || echo false)
     fi
-    if [ -p "$FIFO" ]; then
-        printf "osd-audio:%d:%s\n" "$CUR" "$MUTED" > "$FIFO" &
-    fi
+    qs ipc call shell osdAudio "$CUR" "$MUTED" >/dev/null 2>&1 &
 else
     TARGET="$VAL"
     [ "$TARGET" -gt 100 ] && TARGET=100
@@ -82,7 +75,5 @@ else
         pactl set-sink-volume @DEFAULT_SINK@ "${TARGET}%"
         MUTED="false"
     fi
-    if [ -p "$FIFO" ]; then
-        printf "osd-audio:%d:%s\n" "$TARGET" "$MUTED" > "$FIFO" &
-    fi
+    qs ipc call shell osdAudio "$TARGET" "$MUTED" >/dev/null 2>&1 &
 fi

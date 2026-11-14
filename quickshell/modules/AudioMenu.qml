@@ -260,7 +260,7 @@ PanelWindow {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 26
                         radius: 0
-                        color: isAct ? Theme.hoverBg : (sinkMouse.containsMouse ? "#1b1b1e" : "transparent")
+                        color: isAct ? Theme.hoverBg : (sinkMouse.containsMouse ? Theme.rowHover : "transparent")
                         border.color: isAct ? Theme.accent : Theme.sep
                         border.width: 1
 
@@ -321,7 +321,7 @@ PanelWindow {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 24
                         radius: 0
-                        color: isAct ? Theme.hoverBg : (srcMouse.containsMouse ? "#1b1b1e" : "transparent")
+                        color: isAct ? Theme.hoverBg : (srcMouse.containsMouse ? Theme.rowHover : "transparent")
                         border.color: isAct ? Theme.accent : Theme.sep
                         border.width: 1
 

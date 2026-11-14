@@ -1,25 +1,17 @@
-# Auth with polkit-gnome:
-exec /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
+# Environnement pour systemd --user et D-Bus (portails, notifications, etc.)
+exec systemctl --user import-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK XDG_CURRENT_DESKTOP
+exec dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK XDG_CURRENT_DESKTOP=sway
 
-# Import environment variables for user systemd service manager
-exec systemctl --user import-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK
+# Agent d'authentification polkit (polkit-gnome n'est pas installé)
+exec /usr/lib/x86_64-linux-gnu/libexec/polkit-kde-authentication-agent-1
 
-# Update dbus environments with display variables
-exec hash dbus-update-activation-environment 2>/dev/null && \
-     dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK
-
-# Idle configuration
-exec swayidle idlehint 1
-exec_always swayidle -w before-sleep "gtklock -d"
-
-# Desktop notifications
-# exec mako
-
-# Autotiling
+# Autotiling — une seule instance (exec, pas exec_always : sinon une de plus à chaque reload)
 exec autotiling
 
-# Firewall Applet
-exec sleep 2 && firewall-applet
+# Quickshell : barre, lanceur, menus, notifications, OSD, verrouillage
+exec_always ~/.config/quickshell/scripts/start-quickshell.sh
 
-# nwg-drawer
-exec_always nwg-drawer -r -c 7 -is 90 -mb 10 -ml 50 -mr 50 -mt 10
+# Idle / verrouillage : voir config.d/lock (une seule instance de swayidle)
+# Notifications : gérées par Quickshell (mako retiré)
+# Lanceur : Quickshell (nwg-drawer retiré, non installé)
+# firewall-applet : non installé, retiré

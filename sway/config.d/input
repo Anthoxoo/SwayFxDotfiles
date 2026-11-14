@@ -2,19 +2,23 @@
 #
 # Read `man 5 sway-input` for more information about this section.
 
+# Clavier
+input type:keyboard {
+    xkb_layout "fr"
+}
+
+# Souris
+input type:pointer {
+    pointer_accel -0.2
+    accel_profile "flat"
+}
+
 # Touchpad configuration
 #input type:touchpad {
 #    dwt enabled
 #    tap enabled
 #    natural_scroll enabled
 #}
-
-#Keyboard layout
-input * {
-    xkb_layout "fr
-}
-
-
 
 # Restreint la tablette gérée par OpenTabletDriver à l'écran DP-2
 input "OpenTabletDriver Virtual Tablet" {
@@ -28,7 +32,3 @@ input "OpenTabletDriver Virtual Tablet" {
 #     xkb_layout "us,gb"
 #     xkb_options "grp:alt_shift_toggle"
 # }
-# # Assign the same binding to "pkill -RTMIN+1 waybar" to send signal to
-# # the Waybar keyboard module (so the module shows the updated layout).
-# # This example uses Alt + left Shift.
-# bindsym Alt+Shift_L exec "pkill -RTMIN+1 waybar"

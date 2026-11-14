@@ -237,7 +237,7 @@ PanelWindow {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 28
-                    color: "#0e0e10"
+                    color: Theme.bgInset
                     border.color: Theme.accent
                     border.width: 1
                     radius: 0
@@ -306,7 +306,7 @@ PanelWindow {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 28
                         radius: 0
-                        color: isAct ? Theme.hoverBg : (netMouse.containsMouse ? "#1b1b1e" : "transparent")
+                        color: isAct ? Theme.hoverBg : (netMouse.containsMouse ? Theme.rowHover : "transparent")
                         border.color: isAct ? Theme.accent : (netMouse.containsMouse ? Theme.accent : Theme.sep)
                         border.width: 1
 

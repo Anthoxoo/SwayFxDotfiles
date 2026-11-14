@@ -9,6 +9,14 @@ Rectangle {
 
     property string timeStr: formatNow()
 
+    function isoWeek(d) {
+        let dt = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+        let dayNum = dt.getUTCDay() || 7;
+        dt.setUTCDate(dt.getUTCDate() + 4 - dayNum);
+        let yearStart = new Date(Date.UTC(dt.getUTCFullYear(), 0, 1));
+        return String(Math.ceil((((dt - yearStart) / 86400000) + 1) / 7)).padStart(2, "0");
+    }
+
     function formatNow() {
         let now = new Date();
         let hh = String(now.getHours()).padStart(2, "0");
@@ -16,7 +24,7 @@ Rectangle {
         if (!SysState.clockAlt) return hh + ":" + mm;
         let days = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
         let months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-        return days[now.getDay()] + " " + String(now.getDate()).padStart(2, "0") + " " + months[now.getMonth()] + "  " + hh + ":" + mm;
+        return days[now.getDay()] + " " + String(now.getDate()).padStart(2, "0") + " " + months[now.getMonth()] + "  w" + isoWeek(now) + "  " + hh + ":" + mm;
     }
 
     Timer {

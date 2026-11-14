@@ -13,7 +13,9 @@ PanelWindow {
         right: true
     }
     implicitHeight: 28
-    color: Theme.bg
+    color: Theme.barBg
+    // Namespace layer-shell : ciblé par `layer_effects "qs-bar"` (flou swayfx) dans sway/config.d/theme
+    WlrLayershell.namespace: "qs-bar"
 
     Rectangle {
         anchors.bottom: parent.bottom
@@ -47,6 +49,7 @@ PanelWindow {
         spacing: 14
 
         Mpris { id: mprisModule }
+        ReminderBadge { id: remModule }
         Wifi { id: wifiModule }
         Bluetooth { id: btModule }
         OmaPods { id: podsModule }
@@ -60,6 +63,7 @@ PanelWindow {
 
     property string activeRightTooltip: {
         if (mprisModule.hovered) return mprisModule.tooltipHtml;
+        if (remModule.hovered && !SysState.reminderOpen) return Reminders.tooltipHtml;
         if (wifiModule.hovered && !SysState.wifiMenuOpen) return SysState.wifiTooltipHtml;
         if (btModule.hovered && !SysState.btMenuOpen) return SysState.btTooltipHtml;
         if (podsModule.hovered && !SysState.podsMenuOpen) return SysState.podsTooltipHtml;
@@ -72,6 +76,7 @@ PanelWindow {
 
     property Item hoveredRightItem: {
         if (mprisModule.hovered) return mprisModule;
+        if (remModule.hovered) return remModule;
         if (wifiModule.hovered) return wifiModule;
         if (btModule.hovered) return btModule;
         if (podsModule.hovered) return podsModule;

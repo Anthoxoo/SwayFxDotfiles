@@ -1,3 +1,2 @@
 #!/usr/bin/env bash
-FIFO="/tmp/quickshell-ipc.fifo"
-[ -p "$FIFO" ] && printf "toggle-wifi\n" > "$FIFO" &
+exec qs ipc call shell toggle wifi >/dev/null 2>&1

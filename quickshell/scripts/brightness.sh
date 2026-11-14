@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 ACTION="$1"
 VAL="${2:-5}"
-FIFO="/tmp/quickshell-ipc.fifo"
 
 # Récupérer la valeur actuelle en %
 CUR=$(brightnessctl -m 2>/dev/null | cut -d, -f4 | tr -d '%')
@@ -27,9 +26,7 @@ else
 fi
 
 # Notifier instantanément Quickshell pour un affichage fluide sans saccade
-if [ -p "$FIFO" ]; then
-    printf "osd-bright:%d\n" "$TARGET" > "$FIFO" &
-fi
+qs ipc call shell osdBright "$TARGET" >/dev/null 2>&1 &
 
 # Appliquer matériellement en arrière-plan
 brightnessctl -c backlight set "${TARGET}%" -q

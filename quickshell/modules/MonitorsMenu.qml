@@ -264,7 +264,7 @@ PanelWindow {
                 id: canvasBox
                 Layout.fillWidth: true
                 Layout.preferredHeight: 154
-                color: "#0e0e10"
+                color: Theme.bgInset
                 border.color: Theme.sep
                 border.width: 1
                 radius: 0
@@ -290,7 +290,7 @@ PanelWindow {
                         y: Math.round((canvasBox.height - monWin.bounds.spanH * monWin.canvasScale) / 2 + (logY - monWin.bounds.minY) * monWin.canvasScale)
 
                         radius: 0
-                        color: isSel ? Theme.hoverBg : "#18181b"
+                        color: isSel ? Theme.hoverBg : Theme.bgCard
                         border.color: isSel ? Theme.accent : Theme.muted
                         border.width: 1
                         z: isSel ? 2 : 1

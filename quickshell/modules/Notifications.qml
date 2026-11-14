@@ -71,7 +71,7 @@ PanelWindow {
                 Layout.fillWidth: true
                 implicitHeight: innerCol.implicitHeight + 22
                 radius: 0
-                color: cardMouse.containsMouse ? "#18181b" : Theme.bgSolid
+                color: cardMouse.containsMouse ? Theme.bgCard : Theme.bgSolid
                 border.width: 1
                 border.color: isCritical ? Theme.urgent : Theme.accent
 

@@ -1,3 +1,2 @@
 #!/usr/bin/env bash
-FIFO="/tmp/quickshell-ipc.fifo"
-[ -p "$FIFO" ] && printf "toggle-bt\n" > "$FIFO" &
+exec qs ipc call shell toggle bt >/dev/null 2>&1

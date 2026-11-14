@@ -30,3 +30,9 @@ for_window [class="steam" title="Friends List"] floating enable
 
 # Zed
 for_window [app_id="dev.zed.Zed" title="Zed — Settings"] floating enable
+
+# TUIs Quickshell (Wi-Fi, Bluetooth, batterie, audio)
+for_window [app_id="omarchy-wifi"] floating enable, resize set 920 620, move position center, border pixel 1
+for_window [app_id="omarchy-bt"] floating enable, resize set 860 560, move position center, border pixel 1
+for_window [app_id="omarchy-battery"] floating enable, resize set 760 480, move position center, border pixel 1
+for_window [app_id="omarchy-audio"] floating enable, resize set 760 480, move position center, border pixel 1

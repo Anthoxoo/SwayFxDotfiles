@@ -1,2 +1,6 @@
 singleton Theme 1.0 Theme.qml
 singleton SysState 1.0 SysState.qml
+singleton Wallpapers 1.0 Wallpapers.qml
+singleton Weather 1.0 Weather.qml
+singleton Reminders 1.0 Reminders.qml
+singleton Agenda 1.0 Agenda.qml

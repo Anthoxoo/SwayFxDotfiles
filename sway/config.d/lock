@@ -1,0 +1,12 @@
+# Verrouillage (Quickshell, protocole ext-session-lock)
+# Le verrou est tenu par sway lui-même : si Quickshell plante, l'écran reste verrouillé
+# et Quickshell se re-verrouille automatiquement en redémarrant.
+#
+# Secours si l'écran reste noir/verrouillé sans formulaire :
+#   Ctrl+Alt+F3, se connecter, puis :  WAYLAND_DISPLAY=wayland-1 swaylock
+set $lock ~/.config/quickshell/scripts/lock.sh
+bindsym $mod+l exec $lock
+
+# Inactivité : verrouillage à 30 min, écrans éteints à 31 min, verrouillage avant veille
+# (une seule instance de swayidle, relancée à chaque reload)
+exec_always ~/.config/sway/scripts/idle.sh

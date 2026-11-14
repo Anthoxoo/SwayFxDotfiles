@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if ! command -v fuzzel >/dev/null 2>&1; then
+    notify-send -u normal "window switcher" "fuzzel n'est pas installé : sudo apt install fuzzel"
+    exit 1
+fi
+
 # Define the lengths for each column
 ws_length=2
 app_id_length=14

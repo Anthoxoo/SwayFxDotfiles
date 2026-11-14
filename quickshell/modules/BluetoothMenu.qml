@@ -199,7 +199,7 @@ PanelWindow {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 28
                         radius: 0
-                        color: isConn ? Theme.hoverBg : (devMouse.containsMouse ? "#1b1b1e" : "transparent")
+                        color: isConn ? Theme.hoverBg : (devMouse.containsMouse ? Theme.rowHover : "transparent")
                         border.color: isConn ? Theme.accent : (devMouse.containsMouse ? Theme.accent : Theme.sep)
                         border.width: 1
 

@@ -1,6 +1,0 @@
-bindsym $mod+l exec swaylock --image $HOME/.config/walls/yellow-orange-ish/wall_secondary.png --scaling fill
-
-
-exec swayidle -w \
-    timeout 1800 'swaylock -f --image $HOME/.config/walls/yellow-orange-ish/wall_secondary.png --scaling fill' \
-    before-sleep 'swaylock -f --image $HOME/.config/walls/yellow-orange-ish/wall_secondary.png --scaling fill'

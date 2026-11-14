@@ -25,6 +25,37 @@ PanelWindow {
     property int viewYear: todayDate.getFullYear()
     property int viewMonth: todayDate.getMonth()
     property var weeksModel: []
+    property var selectedDate: new Date()
+
+    // Formulaire "nouvel événement" (ouvre Google Agenda pré-rempli)
+    property bool adding: false
+    property string addError: ""
+    readonly property var addSlot: adding ? Agenda.parseSlot(evWhen.text, selectedDate) : null
+
+    function startAdding() {
+        addError = "";
+        evTitle.text = "";
+        evWhen.text = "";
+        adding = true;
+        evTitle.forceActiveFocus();
+    }
+
+    function cancelAdding() {
+        adding = false;
+        keyCatcher.forceActiveFocus();
+    }
+
+    function submitEvent() {
+        let err = Agenda.openCreate(evTitle.text, evWhen.text, selectedDate);
+        if (err !== "") {
+            addError = err;
+            if (Agenda.splitTitle(evTitle.text).title === "") evTitle.forceActiveFocus();
+            else evWhen.forceActiveFocus();
+            return;
+        }
+        adding = false;
+        SysState.calendarMenuOpen = false;   // laisser le navigateur prendre le focus
+    }
 
     readonly property var monthNames: [
         "january", "february", "march", "april", "may", "june",
@@ -56,15 +87,18 @@ PanelWindow {
             let thu = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate() + w * 7 + 3);
             let wkNum = String(isoWeekNumber(thu)).padStart(2, "0");
             let days = [];
+            let hasToday = false;
             for (let d = 0; d < 7; d++) {
                 let cur = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate() + w * 7 + d);
                 days.push({
+                    date: cur,
                     dayNum: String(cur.getDate()),
                     inMonth: cur.getMonth() === viewMonth,
                     isToday: isSameDay(cur, todayDate)
                 });
+                if (isSameDay(cur, todayDate)) hasToday = true;
             }
-            rows.push({ week: "w" + wkNum, days: days });
+            rows.push({ week: "w" + wkNum, days: days, isCurrent: hasToday });
         }
         weeksModel = rows;
     }
@@ -78,6 +112,7 @@ PanelWindow {
 
     function resetToday() {
         todayDate = new Date();
+        selectedDate = todayDate;
         viewYear = todayDate.getFullYear();
         viewMonth = todayDate.getMonth();
         rebuildCalendar();
@@ -85,7 +120,9 @@ PanelWindow {
 
     onVisibleChanged: {
         if (visible) {
+            adding = false;
             resetToday();
+            Agenda.refreshIfStale();
             keyCatcher.forceActiveFocus();
             focusRetry.restart();
         }
@@ -116,6 +153,9 @@ PanelWindow {
                 event.accepted = true;
             } else if (event.key === Qt.Key_T || event.key === Qt.Key_Home) {
                 calWin.resetToday();
+                event.accepted = true;
+            } else if (event.key === Qt.Key_N || event.key === Qt.Key_Plus) {
+                calWin.startAdding();
                 event.accepted = true;
             }
         }
@@ -164,6 +204,14 @@ PanelWindow {
                     color: Theme.accent
                     font.family: Theme.fontMain
                     font.pixelSize: 13
+                }
+
+                // Semaine ISO du jour
+                Text {
+                    text: "· week " + calWin.isoWeekNumber(calWin.todayDate)
+                    color: Theme.muted
+                    font.family: Theme.fontMain
+                    font.pixelSize: 12
                 }
 
                 Item { Layout.fillWidth: true }
@@ -302,7 +350,8 @@ PanelWindow {
                             Text {
                                 anchors.centerIn: parent
                                 text: modelData.week
-                                color: Theme.disabled
+                                color: modelData.isCurrent ? Theme.accent : Theme.disabled
+                                font.bold: modelData.isCurrent
                                 font.family: Theme.fontMain
                                 font.pixelSize: 11
                             }
@@ -316,7 +365,31 @@ PanelWindow {
                                 Layout.preferredWidth: 32
                                 Layout.preferredHeight: 26
                                 radius: 0
-                                color: modelData.isToday ? Theme.accent : "transparent"
+                                color: modelData.isToday ? Theme.accent : (dayMouse.containsMouse ? Theme.hoverBg : "transparent")
+                                border.width: (!modelData.isToday && calWin.isSameDay(modelData.date, calWin.selectedDate)) ? 1 : 0
+                                border.color: Theme.accent
+
+                                // Jour avec événements (agenda iCal)
+                                Rectangle {
+                                    visible: Agenda.hasEvents(modelData.date)
+                                    width: 4
+                                    height: 4
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    anchors.bottom: parent.bottom
+                                    anchors.bottomMargin: 2
+                                    color: modelData.isToday ? Theme.bgSolid : (modelData.inMonth ? Theme.accent : Theme.disabled)
+                                }
+
+                                MouseArea {
+                                    id: dayMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onPressed: {
+                                        calWin.selectedDate = modelData.date;
+                                        keyCatcher.forceActiveFocus();
+                                    }
+                                }
 
                                 Text {
                                     anchors.centerIn: parent
@@ -330,6 +403,320 @@ PanelWindow {
                                     }
                                 }
                             }
+                        }
+                    }
+                }
+            }
+
+            // --- Agenda (iCal) ---
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 1
+                color: Theme.sep
+            }
+
+            ColumnLayout {
+                id: agendaCol
+                Layout.fillWidth: true
+                spacing: 3
+
+                readonly property var dayEvents: Agenda.configured ? Agenda.eventsOn(calWin.selectedDate) : []
+                readonly property int maxShown: 6
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 6
+
+                    Text {
+                        text: {
+                            let d = calWin.selectedDate;
+                            if (calWin.isSameDay(d, calWin.todayDate)) return "today";
+                            let days = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+                            return days[d.getDay()] + " " + d.getDate() + " " + calWin.monthNames[d.getMonth()].substring(0, 3);
+                        }
+                        color: Theme.accent
+                        font.family: Theme.fontMain
+                        font.pixelSize: 12
+                    }
+                    Item { Layout.fillWidth: true }
+                    Text {
+                        visible: Agenda.error !== ""
+                        text: "\u{F0026} offline"
+                        color: Theme.urgent
+                        font.family: Theme.fontMain
+                        font.pixelSize: 10
+                    }
+
+                    // Nouvel événement (raccourci : n)
+                    Rectangle {
+                        width: 18
+                        height: 18
+                        radius: 0
+                        color: addMouse.containsMouse || calWin.adding ? Theme.hoverBg : "transparent"
+                        border.color: addMouse.containsMouse || calWin.adding ? Theme.accent : Theme.sep
+                        border.width: 1
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "+"
+                            color: addMouse.containsMouse || calWin.adding ? Theme.accent : Theme.fg
+                            font.family: Theme.fontMain
+                            font.pixelSize: 12
+                        }
+
+                        MouseArea {
+                            id: addMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onPressed: calWin.adding ? calWin.cancelAdding() : calWin.startAdding()
+                        }
+                    }
+                }
+
+                // Formulaire nouvel événement
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: formCol.implicitHeight
+                    visible: calWin.adding
+                    color: Theme.bgInset
+                    border.color: Theme.sep
+                    border.width: 1
+
+                    ColumnLayout {
+                        id: formCol
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        spacing: 0
+
+                        // Titre (+ lieu après " @ ")
+                        Item {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 28
+
+                            Text {
+                                anchors.left: parent.left
+                                anchors.leftMargin: 8
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: "title  (@ place)"
+                                color: Theme.placeholder
+                                font.family: Theme.fontMain
+                                font.pixelSize: 12
+                                visible: evTitle.text.length === 0
+                            }
+                            TextInput {
+                                id: evTitle
+                                anchors.fill: parent
+                                anchors.leftMargin: 8
+                                anchors.rightMargin: 8
+                                verticalAlignment: TextInput.AlignVCenter
+                                color: Theme.fg
+                                selectionColor: Theme.accent
+                                selectedTextColor: Theme.bgSolid
+                                font.family: Theme.fontMain
+                                font.pixelSize: 12
+                                clip: true
+                                KeyNavigation.tab: evWhen
+                                onTextChanged: calWin.addError = ""
+                                Keys.onReturnPressed: evWhen.forceActiveFocus()
+                                Keys.onEnterPressed: evWhen.forceActiveFocus()
+                                Keys.onEscapePressed: calWin.cancelAdding()
+                            }
+                        }
+
+                        Rectangle { Layout.fillWidth: true; Layout.preferredHeight: 1; color: Theme.sep }
+
+                        // Créneau
+                        Item {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 28
+
+                            Text {
+                                anchors.left: parent.left
+                                anchors.leftMargin: 8
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: "14:00 · 14-16 · 9h+30m · empty = all day"
+                                color: Theme.placeholder
+                                font.family: Theme.fontMain
+                                font.pixelSize: 12
+                                visible: evWhen.text.length === 0
+                            }
+                            TextInput {
+                                id: evWhen
+                                anchors.fill: parent
+                                anchors.leftMargin: 8
+                                anchors.rightMargin: 8
+                                verticalAlignment: TextInput.AlignVCenter
+                                color: Theme.fg
+                                selectionColor: Theme.accent
+                                selectedTextColor: Theme.bgSolid
+                                font.family: Theme.fontMain
+                                font.pixelSize: 12
+                                clip: true
+                                KeyNavigation.tab: evTitle
+                                KeyNavigation.backtab: evTitle
+                                onTextChanged: calWin.addError = ""
+                                Keys.onReturnPressed: calWin.submitEvent()
+                                Keys.onEnterPressed: calWin.submitEvent()
+                                Keys.onEscapePressed: calWin.cancelAdding()
+                            }
+                        }
+
+                        Rectangle { Layout.fillWidth: true; Layout.preferredHeight: 1; color: Theme.sep }
+
+                        // Aperçu / erreur
+                        Text {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 22
+                            leftPadding: 8
+                            rightPadding: 8
+                            verticalAlignment: Text.AlignVCenter
+                            elide: Text.ElideRight
+                            text: {
+                                if (calWin.addError !== "") return calWin.addError;
+                                if (!calWin.addSlot) return "invalid time";
+                                return "\u{F00ED}  " + Agenda.slotLabel(calWin.addSlot) + "  · enter ↗";
+                            }
+                            color: (calWin.addError !== "" || !calWin.addSlot) ? Theme.urgent : Theme.muted
+                            font.family: Theme.fontMain
+                            font.pixelSize: 11
+                        }
+                    }
+                }
+
+                Repeater {
+                    model: agendaCol.dayEvents.slice(0, agendaCol.maxShown)
+                    delegate: RowLayout {
+                        required property var modelData
+                        Layout.fillWidth: true
+                        spacing: 8
+
+                        Text {
+                            text: Agenda.timeRange(modelData, calWin.selectedDate)
+                            color: Theme.muted
+                            font.family: Theme.fontMain
+                            font.pixelSize: 11
+                            Layout.preferredWidth: 78
+                        }
+                        Text {
+                            text: modelData.title + (modelData.location ? "  · " + modelData.location : "")
+                            color: Theme.fg
+                            elide: Text.ElideRight
+                            font.family: Theme.fontMain
+                            font.pixelSize: 11
+                            Layout.fillWidth: true
+                        }
+                    }
+                }
+
+                Text {
+                    visible: agendaCol.dayEvents.length > agendaCol.maxShown
+                    text: "+" + (agendaCol.dayEvents.length - agendaCol.maxShown) + " more"
+                    color: Theme.disabled
+                    font.family: Theme.fontMain
+                    font.pixelSize: 11
+                }
+                Text {
+                    visible: Agenda.configured && agendaCol.dayEvents.length === 0 && !calWin.adding
+                    text: "no events"
+                    color: Theme.disabled
+                    font.family: Theme.fontMain
+                    font.pixelSize: 11
+                }
+            }
+
+            Text {
+                visible: !Agenda.configured
+                Layout.fillWidth: true
+                wrapMode: Text.WordWrap
+                text: "agenda: add an iCal URL to ~/.config/quickshell/ical.conf"
+                color: Theme.disabled
+                font.family: Theme.fontMain
+                font.pixelSize: 10
+            }
+
+            // --- Météo (wttr.in) ---
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 1
+                color: Theme.sep
+                visible: Weather.ready
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                visible: Weather.ready
+                spacing: 10
+
+                Text {
+                    text: Weather.icon
+                    color: Theme.accent
+                    font.family: Theme.fontMain
+                    font.pixelSize: 28
+                }
+
+                ColumnLayout {
+                    spacing: 0
+                    Layout.fillWidth: true
+
+                    Text {
+                        text: Weather.temp + "°  " + Weather.desc
+                        color: Theme.fg
+                        elide: Text.ElideRight
+                        Layout.fillWidth: true
+                        font.family: Theme.fontMain
+                        font.pixelSize: 13
+                    }
+                    Text {
+                        text: "feels " + Weather.feels + "° · " + Weather.humidity + "% · " + Weather.wind + " km/h"
+                        color: Theme.muted
+                        font.family: Theme.fontMain
+                        font.pixelSize: 11
+                    }
+                }
+
+                Text {
+                    text: Weather.area
+                    color: Theme.disabled
+                    font.family: Theme.fontMain
+                    font.pixelSize: 11
+                    Layout.alignment: Qt.AlignTop
+                }
+            }
+
+            Row {
+                id: forecastRow
+                Layout.fillWidth: true
+                visible: Weather.ready && Weather.days.length > 0
+
+                Repeater {
+                    model: Weather.days
+                    delegate: Column {
+                        required property var modelData
+                        width: forecastRow.width / Math.max(1, Weather.days.length)
+                        spacing: 1
+
+                        Text {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            text: modelData.label
+                            color: Theme.muted
+                            font.family: Theme.fontMain
+                            font.pixelSize: 11
+                        }
+                        Text {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            text: modelData.icon
+                            color: Theme.fg
+                            font.family: Theme.fontMain
+                            font.pixelSize: 16
+                        }
+                        Text {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            text: modelData.min + "° / " + modelData.max + "°"
+                            color: Theme.fg
+                            font.family: Theme.fontMain
+                            font.pixelSize: 11
                         }
                     }
                 }
