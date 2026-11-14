@@ -1,18 +1,10 @@
-// Zed settings
-//
-// For information on how to configure Zed, see the Zed
-// documentation: https://zed.dev/docs/configuring-zed
-//
-// To see all of Zed's default settings without changing your
-// custom settings, run `zed: open default settings` from the
-// command palette (cmd-shift-p / ctrl-shift-p)
-
 {
   "inlay_hints": {
     "enabled": true
   },
   "terminal": {
-    "font_family": "JetBrainsMono Nerd Font"
+    "font_family": "JetBrainsMono Nerd Font",
+    "font_size": 15
   },
   "lsp": {
     "qml": {
@@ -48,7 +40,8 @@
   },
   "cli_default_open_behavior": "existing_window",
   "project_panel": {
-    "dock": "left"
+    "dock": "left",
+    "indent_size": 16
   },
   "outline_panel": {
     "dock": "left"
@@ -68,31 +61,10 @@
     "trust_all_worktrees": true
   },
   "buffer_line_height": "comfortable",
+  "ui_font_family": "JetBrainsMono Nerd Font",
+  "ui_font_size": 17.0,
   "buffer_font_family": "JetBrainsMono Nerd Font",
-  "ssh_connections": [
-    {
-      "host": "192.168.1.101",
-      "args": [],
-      "projects": [
-        {
-          "paths": [
-            "/home/antoine/Dev/python/./"
-          ]
-        },
-        {
-          "paths": [
-            "/home/antoine/Dev/zero_to_prod_backend_rust"
-          ]
-        },
-        {
-          "paths": [
-            "/home/antoine/Documents/Fac/Projet_Info/Atelier2/./"
-          ]
-        }
-      ],
-      "nickname": "Laptop fedora"
-    }
-  ],
+  "buffer_font_size": 18.0,
   "disable_ai": true,
   "telemetry": {
     "diagnostics": false,
@@ -106,12 +78,10 @@
     "light": "Zed (Default)",
     "dark": "Warm Charmed Icons"
   },
-  "ui_font_size": 16,
-  "buffer_font_size": 15,
   "theme": {
     "mode": "dark",
     "light": "One Dark",
-    "dark": "Discord Dark"
+    "dark": "Orange Black"
   },
   "tab_bar": {
     "show": false
@@ -134,13 +104,13 @@
   },
   "experimental.theme_overrides": {
     "editor.indent_guide": "#ffffff10",
-    "editor.indent_guide_active": "#38bdf8",
+    "editor.indent_guide_active": "#ff8800",
     "syntax": {
-          "hint": {
-            "color": "#5c7582",
-            "font_style": "italic"
-          }
-        }
+      "hint": {
+        "color": "#5c7582",
+        "font_style": "italic"
+      }
+    }
   },
   "title_bar": {
     "show_user_picture": false

@@ -16,7 +16,8 @@ zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 
 . "$HOME/.local/bin/env"
 
-# ALIASES
+# ALIASES 
 alias c="clear"
 alias wifi="nmtui"
 export LIBVA_DRIVER_NAME=iHD
+export XDG_STATE_HOME="$HOME/.local/state"
