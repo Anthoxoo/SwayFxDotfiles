@@ -50,6 +50,7 @@ PanelWindow {
         Wifi { id: wifiModule }
         Bluetooth { id: btModule }
         OmaPods { id: podsModule }
+        Monitors { id: monModule }
         Backlight { id: blModule }
         Audio { id: audioModule }
         Battery { id: batModule }
@@ -59,12 +60,13 @@ PanelWindow {
 
     property string activeRightTooltip: {
         if (mprisModule.hovered) return mprisModule.tooltipHtml;
-        if (wifiModule.hovered) return SysState.wifiTooltipHtml;
-        if (btModule.hovered) return SysState.btTooltipHtml;
+        if (wifiModule.hovered && !SysState.wifiMenuOpen) return SysState.wifiTooltipHtml;
+        if (btModule.hovered && !SysState.btMenuOpen) return SysState.btTooltipHtml;
         if (podsModule.hovered && !SysState.podsMenuOpen) return SysState.podsTooltipHtml;
+        if (monModule.hovered && !SysState.monitorsMenuOpen) return SysState.monitorsTooltipHtml;
         if (blModule.hovered && !SysState.brightnessMenuOpen) return SysState.brightTooltipHtml;
-        if (audioModule.hovered) return SysState.audioTooltipHtml;
-        if (batModule.hovered) return SysState.batTooltipHtml;
+        if (audioModule.hovered && !SysState.audioMenuOpen) return SysState.audioTooltipHtml;
+        if (batModule.hovered && !SysState.batteryMenuOpen) return SysState.batTooltipHtml;
         return "";
     }
 
@@ -73,33 +75,47 @@ PanelWindow {
         if (wifiModule.hovered) return wifiModule;
         if (btModule.hovered) return btModule;
         if (podsModule.hovered) return podsModule;
+        if (monModule.hovered) return monModule;
         if (blModule.hovered) return blModule;
         if (audioModule.hovered) return audioModule;
         if (batModule.hovered) return batModule;
         return null;
     }
 
-    // Popup Infobulle universelle pour les modules de droite
-    PopupWindow {
-        id: rightTooltipPopup
-        anchor.window: barWindow
-        anchor.rect.x: {
-            if (!barWindow.hoveredRightItem) return barWindow.width - implicitWidth - 12;
-            let pt = barWindow.hoveredRightItem.mapToItem(null, barWindow.hoveredRightItem.width / 2, 0);
-            let targetX = Math.round(pt.x - (implicitWidth / 2));
-            return Math.max(8, Math.min(barWindow.width - implicitWidth - 8, targetX));
-        }
-        anchor.rect.y: barWindow.height + 4
+    property int tooltipRightMargin: {
+        if (!hoveredRightItem) return 12;
+        let itemCenterFromRight = (rightRow.width - (hoveredRightItem.x + hoveredRightItem.width / 2)) + 12;
+        let tipW = Math.max(80, rightTipText.implicitWidth + 24);
+        return Math.max(8, Math.round(itemCenterFromRight - tipW / 2));
+    }
+
+    // Infobulle stable en PanelWindow (aucune erreur xdg_popup sous Sway/wlroots)
+    PanelWindow {
+        screen: barWindow.screen
         visible: barWindow.activeRightTooltip !== ""
-        implicitWidth: rightTipText.implicitWidth + 24
-        implicitHeight: rightTipText.implicitHeight + 18
+        focusable: false
+        aboveWindows: true
+        exclusionMode: ExclusionMode.Ignore
         color: "transparent"
+
+        anchors {
+            top: true
+            right: true
+        }
+        margins {
+            top: 32
+            right: barWindow.tooltipRightMargin
+        }
+
+        implicitWidth: Math.max(40, rightTipText.implicitWidth + 24)
+        implicitHeight: Math.max(24, rightTipText.implicitHeight + 18)
 
         Rectangle {
             anchors.fill: parent
             color: Theme.bgSolid
             border.color: Theme.accent
             border.width: 1
+            radius: 0
 
             Text {
                 id: rightTipText

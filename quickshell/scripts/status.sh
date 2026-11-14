@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 export LC_ALL=C
+export PATH="$HOME/.local/bin:$PATH"
 
-WIN=$(swaymsg -t get_tree 2>/dev/null | jq -r '.. | objects | select(.focused == true and (.type == "con" or .type == "floating_con")) | "\(.app_id // .window_properties.class // "")>>>\(.name // "")"' | head -n1)
-MODE=$(swaymsg -t get_binding_state 2>/dev/null | jq -r '.name // "default"')
+WIN=$(swaymsg -t get_tree 2>/dev/null | jq -r '.. | objects | select(.focused == true and (.type == "con" or .type == "floating_con")) | "\(.app_id // .window_properties.class // "")>>>\(.name // "")"' | head -n1 | tr -d '\n')
+MODE=$(swaymsg -t get_binding_state 2>/dev/null | jq -r '.name // "default"' | head -n1 | tr -d '\n')
 
 if command -v pamixer >/dev/null 2>&1; then
     MUTED=$(pamixer --get-mute 2>/dev/null || echo false)
@@ -17,10 +18,9 @@ else
 fi
 
 DEF_SINK=$(pactl get-default-sink 2>/dev/null)
-SINK_DESC=$(pactl list sinks 2>/dev/null | awk -v s="$DEF_SINK" '$1=="Name:" && $2==s {f=1} f && $1=="Description:" {sub(/^[ \t]*Description:[ \t]*/, ""); print; exit}')
+SINK_DESC=$(pactl list sinks 2>/dev/null | awk -v s="$DEF_SINK" '$1=="Name:" && $2==s {f=1} f && $1=="Description:" {sub(/^[ \t]*Description:[ \t]*/, ""); print; exit}' | tr -d '\n')
 [ -z "$SINK_DESC" ] && SINK_DESC="default"
 
-DEF_SRC=$(pactl get-default-source 2>/dev/null)
 SRC_MUTE=$(pactl get-source-mute @DEFAULT_SOURCE@ 2>/dev/null | awk '{print $2}')
 [ "$SRC_MUTE" = "yes" ] && MIC_STATE="muted" || MIC_STATE="active"
 
@@ -53,24 +53,28 @@ fi
 
 if command -v bluetoothctl >/dev/null 2>&1; then
     BT_POWER=$(bluetoothctl show 2>/dev/null | grep -q 'Powered: yes' && echo on || echo off)
-    BT_DEV=$(bluetoothctl info 2>/dev/null | awk -F': ' '/Alias:/ {print $2; exit}')
+    BT_DEV=$(bluetoothctl info 2>/dev/null | awk -F': ' '/Alias:/ {print $2; exit}' | tr -d '\n')
 else
     BT_POWER="off"
     BT_DEV=""
 fi
 
 if command -v nmcli >/dev/null 2>&1; then
-    WIFI_RADIO=$(nmcli -t -f WIFI g 2>/dev/null || echo enabled)
-    WIFI_LINE=$(nmcli -t -f active,ssid,signal,security dev wifi list --rescan no 2>/dev/null | grep '^yes:' | head -n1)
-    ETH_CON=$(nmcli -t -f TYPE,STATE dev 2>/dev/null | grep '^ethernet:connected' | head -n1)
+    WIFI_RADIO=$(nmcli -t -f WIFI g 2>/dev/null | head -n1 || echo enabled)
+    WIFI_LINE=$(nmcli -t -f active,ssid,signal,security dev wifi list --rescan no 2>/dev/null | grep '^yes:' | head -n1 | tr -d '\n')
+    ETH_CON=$(nmcli -t -f TYPE,STATE dev 2>/dev/null | grep '^ethernet:connected' | head -n1 | tr -d '\n')
 else
     WIFI_RADIO="enabled"
     WIFI_LINE=""
     ETH_CON=""
 fi
-IP_ADDR=$(ip -4 route get 1.1.1.1 2>/dev/null | awk '{for(i=1;i<=NF;i++) if($i=="src") print $(i+1)}' | head -n1)
+IP_ADDR=$(ip -4 route get 1.1.1.1 2>/dev/null | awk '{for(i=1;i<=NF;i++) if($i=="src") print $(i+1)}' | head -n1 | tr -d '\n')
 
-PODS_JSON=$(python3 "$HOME/.config/quickshell/scripts/omapods-ctl.py" status 2>/dev/null || echo '{"running":false,"connected":false,"barPct":-1}')
+PODS_JSON=$(python3 "$HOME/.config/quickshell/scripts/omapods-ctl.py" status 2>/dev/null | tr -d '\n')
+[ -z "$PODS_JSON" ] && PODS_JSON='{"running":false,"connected":false,"barPct":-1,"modes":[]}'
 
-printf '%s@@SEP@@%s@@SEP@@%s@@SEP@@%s@@SEP@@%s@@SEP@@%s@@SEP@@%s@@SEP@@%s@@SEP@@%s@@SEP@@%s@@SEP@@%s@@SEP@@%s@@SEP@@%s@@SEP@@%s@@SEP@@%s@@SEP@@%s@@SEP@@%s@@SEP@@%s\n' \
-    "$WIN" "$MODE" "$MUTED" "$VOL" "$BRIGHT" "$BAT_CAP" "$BAT_STATUS" "$BT_POWER" "$BT_DEV" "$WIFI_RADIO" "$WIFI_LINE" "$ETH_CON" "$IP_ADDR" "$BAT_W" "$PWR_PROF" "$PODS_JSON" "$SINK_DESC" "$MIC_STATE"
+MONS_JSON=$(python3 "$HOME/.config/quickshell/scripts/monitors-ctl.py" status 2>/dev/null | tr -d '\n')
+[ -z "$MONS_JSON" ] && MONS_JSON='{"count":1,"activeCount":1,"hideWhenSingle":false,"outputs":[]}'
+
+printf '%s@@SEP@@%s@@SEP@@%s@@SEP@@%s@@SEP@@%s@@SEP@@%s@@SEP@@%s@@SEP@@%s@@SEP@@%s@@SEP@@%s@@SEP@@%s@@SEP@@%s@@SEP@@%s@@SEP@@%s@@SEP@@%s@@SEP@@%s@@SEP@@%s@@SEP@@%s@@SEP@@%s\n' \
+    "$WIN" "$MODE" "$MUTED" "$VOL" "$BRIGHT" "$BAT_CAP" "$BAT_STATUS" "$BT_POWER" "$BT_DEV" "$WIFI_RADIO" "$WIFI_LINE" "$ETH_CON" "$IP_ADDR" "$BAT_W" "$PWR_PROF" "$PODS_JSON" "$SINK_DESC" "$MIC_STATE" "$MONS_JSON"

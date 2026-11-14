@@ -24,7 +24,7 @@ PanelWindow {
     }
 
     implicitWidth: 340
-    implicitHeight: notifCol.implicitHeight
+    implicitHeight: Math.max(1, notifCol.implicitHeight)
 
     NotificationServer {
         id: notifServer

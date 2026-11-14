@@ -10,7 +10,7 @@ PanelWindow {
     visible: SysState.podsMenuOpen
     focusable: true
     WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.keyboardFocus: SysState.podsMenuOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
     exclusionMode: ExclusionMode.Ignore
     color: "transparent"
 
@@ -21,7 +21,17 @@ PanelWindow {
         right: true
     }
 
-    property var st: SysState.podsState || ({ running: false, connected: false })
+    property var st: SysState.podsState || ({
+        running: false,
+        connected: false,
+        mode: "anc",
+        modes: ["anc", "adaptive", "transparency", "off"],
+        adaptiveLevel: 50,
+        ca: false,
+        oneBud: true,
+        ear: "one",
+        audioProfile: "a2dp"
+    })
 
     onVisibleChanged: {
         if (visible) {
@@ -39,7 +49,6 @@ PanelWindow {
         }
     }
 
-    // Raccourcis clavier officiels d'OmaPods
     Item {
         id: keyCatcher
         anchors.fill: parent
@@ -69,18 +78,18 @@ PanelWindow {
             } else if (event.key === Qt.Key_E) {
                 SysState.podsCycleEar();
                 event.accepted = true;
+            } else if (event.key === Qt.Key_M) {
+                let nextProf = (podsWin.st.audioProfile === "hfp") ? "a2dp" : "hfp";
+                SysState.podsSetProfile(nextProf);
+                event.accepted = true;
             } else if (event.key === Qt.Key_R) {
                 SysState.podsCmd("reopen");
                 event.accepted = true;
             } else if (event.key === Qt.Key_Left || event.key === Qt.Key_H) {
-                if (podsWin.st.mode === "adaptive") {
-                    SysState.podsSetAdaptive(Math.max(0, (podsWin.st.adaptiveLevel || 50) - 5));
-                }
+                SysState.podsSetAdaptive(Math.max(0, (podsWin.st.adaptiveLevel || 50) - 5));
                 event.accepted = true;
             } else if (event.key === Qt.Key_Right || event.key === Qt.Key_L) {
-                if (podsWin.st.mode === "adaptive") {
-                    SysState.podsSetAdaptive(Math.min(100, (podsWin.st.adaptiveLevel || 50) + 5));
-                }
+                SysState.podsSetAdaptive(Math.min(100, (podsWin.st.adaptiveLevel || 50) + 5));
                 event.accepted = true;
             } else if (event.key === Qt.Key_Tab) {
                 SysState.podsMenuOpen = false;
@@ -96,12 +105,12 @@ PanelWindow {
     }
 
     Rectangle {
-        width: 300
-        height: mainCol.implicitHeight + 24
+        width: 334
+        height: Math.max(80, mainCol.implicitHeight + 24)
         anchors.top: parent.top
         anchors.right: parent.right
         anchors.topMargin: 32
-        anchors.rightMargin: 95
+        anchors.rightMargin: 85
         color: Theme.bgSolid
         border.color: Theme.accent
         border.width: 1
@@ -118,77 +127,98 @@ PanelWindow {
             anchors.margins: 12
             spacing: 10
 
-            // En-tête : Nom du modèle + état du boîtier
+            // --- EN-TÊTE : Modèle + Boutons Resync [r] & Connect/Disconnect ---
             RowLayout {
-                Layout.fillWidth: true
-                Text {
-                    text: podsWin.st.connected ? ("󱡏  " + (podsWin.st.name || "airpods").toLowerCase()) : "󱡏  airpods"
-                    color: Theme.accent
-                    font.family: Theme.fontMain
-                    font.pixelSize: 13
-                }
-                Item { Layout.fillWidth: true }
-                Text {
-                    text: {
-                        if (!podsWin.st.running) return "daemon off";
-                        if (!podsWin.st.connected) return "disconnected";
-                        if (podsWin.st.lid) return "lid " + podsWin.st.lid;
-                        return "connected";
-                    }
-                    color: Theme.muted
-                    font.family: Theme.fontMain
-                    font.pixelSize: 11
-                }
-            }
-
-            // Message d'état si déconnecté ou démon arrêté
-            Text {
-                visible: !podsWin.st.running || !podsWin.st.connected
-                text: !podsWin.st.running
-                      ? "librepods daemon is not running"
-                      : "no airpods connected"
-                color: Theme.muted
-                font.family: Theme.fontMain
-                font.pixelSize: 12
-            }
-
-            // Section Batteries (Left, Right, Case ou Single pour Max)
-            ColumnLayout {
-                visible: podsWin.st.connected
                 Layout.fillWidth: true
                 spacing: 6
 
-                Repeater {
-                    model: {
-                        if (!podsWin.st || !podsWin.st.connected) return [];
-                        if (podsWin.st.isMax) {
-                            return [{ label: "headphone", data: podsWin.st.single }];
-                        }
-                        let rows = [
-                            { label: "left",  data: podsWin.st.left },
-                            { label: "right", data: podsWin.st.right }
-                        ];
-                        if (podsWin.st.case && podsWin.st.case.level >= 0) {
-                            rows.push({ label: "case", data: podsWin.st.case });
-                        }
-                        return rows;
+                Text {
+                    text: "󱡏  " + (podsWin.st.name || "airpods").toLowerCase()
+                    color: Theme.accent
+                    font.family: Theme.fontMain
+                    font.pixelSize: 13
+                    elide: Text.ElideRight
+                    Layout.fillWidth: true
+                }
+
+                // Bouton Resync AAP [r]
+                Rectangle {
+                    visible: Boolean(podsWin.st.connected)
+                    width: 24
+                    height: 20
+                    radius: 0
+                    color: resyncMouse.containsMouse ? Theme.hoverBg : "transparent"
+                    border.color: resyncMouse.containsMouse ? Theme.accent : Theme.sep
+                    border.width: 1
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "󰑐"
+                        color: resyncMouse.containsMouse ? Theme.accent : Theme.muted
+                        font.family: Theme.fontMain
+                        font.pixelSize: 11
                     }
 
+                    MouseArea {
+                        id: resyncMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onPressed: Qt.callLater(() => SysState.podsCmd("reopen"))
+                    }
+                }
+
+                // Bouton Connect / Disconnect Bluetooth
+                Rectangle {
+                    width: connTxt.implicitWidth + 14
+                    height: 20
+                    radius: 0
+                    color: connMouse.containsMouse ? Theme.hoverBg : "transparent"
+                    border.color: podsWin.st.connected ? Theme.accent : Theme.sep
+                    border.width: 1
+
+                    Text {
+                        id: connTxt
+                        anchors.centerIn: parent
+                        text: podsWin.st.connected ? "connected" : "connect"
+                        color: podsWin.st.connected ? Theme.accent : Theme.muted
+                        font.family: Theme.fontMain
+                        font.pixelSize: 10
+                    }
+
+                    MouseArea {
+                        id: connMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onPressed: Qt.callLater(() => SysState.podsCmd("bt-toggle"))
+                    }
+                }
+            }
+
+            // --- SECTION BATTERIES (Left, Right, Case + indicateurs in-ear / charge) ---
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 5
+
+                Repeater {
+                    model: ["left", "right", "case"]
                     delegate: RowLayout {
-                        required property var modelData
+                        required property string modelData
+                        property var podObj: (podsWin.st && podsWin.st[modelData]) ? podsWin.st[modelData] : ({ level: -1, charging: false, inEar: false })
+                        property int lvl: podObj.level !== undefined ? podObj.level : -1
+                        property bool chg: Boolean(podObj.charging)
+                        property bool ear: Boolean(podObj.inEar)
+
                         Layout.fillWidth: true
                         spacing: 8
 
-                        property int lvl: modelData.data ? modelData.data.level : -1
-                        property bool chg: modelData.data ? modelData.data.charging : false
-                        property bool ear: modelData.data ? modelData.data.inEar : false
-
                         Text {
-                            text: modelData.label
+                            text: modelData
                             color: Theme.muted
                             font.family: Theme.fontMain
-                            font.pixelSize: 12
-                            Layout.preferredWidth: 46
+                            font.pixelSize: 11
+                            Layout.preferredWidth: 38
                         }
 
                         Rectangle {
@@ -198,9 +228,9 @@ PanelWindow {
                             radius: 0
 
                             Rectangle {
-                                width: parent.parent.lvl >= 0 ? Math.round((parent.parent.lvl / 100.0) * parent.width) : 0
+                                width: parent.parent.lvl > 0 ? Math.round((parent.parent.lvl / 100.0) * parent.width) : 0
                                 height: parent.height
-                                color: parent.parent.lvl <= 15 && parent.parent.lvl >= 0 ? Theme.urgent : Theme.accent
+                                color: (parent.parent.lvl <= 15 && parent.parent.lvl > 0) ? Theme.urgent : Theme.accent
                                 radius: 0
                             }
                         }
@@ -208,118 +238,125 @@ PanelWindow {
                         Text {
                             text: {
                                 if (parent.lvl <= 0) return "-";
-                                let suffix = parent.chg ? " 󰂄" : (parent.ear ? " ·" : "");
-                                return parent.lvl + "%" + suffix;
+                                let stTag = parent.chg ? " 󰂄" : (parent.ear ? " in" : "");
+                                return parent.lvl + "%" + stTag;
                             }
-                            color: Theme.fg
+                            color: parent.ear ? Theme.accent : Theme.fg
                             font.family: Theme.fontMain
-                            font.pixelSize: 12
-                            Layout.preferredWidth: 52
+                            font.pixelSize: 11
+                            Layout.preferredWidth: 56
                             horizontalAlignment: Text.AlignRight
                         }
                     }
                 }
             }
 
-            // Séparateur Modes d'écoute
             Rectangle {
-                visible: podsWin.st.connected && podsWin.st.modes && podsWin.st.modes.length > 0
                 Layout.fillWidth: true
                 Layout.preferredHeight: 1
                 color: Theme.sep
             }
 
-            Text {
-                visible: podsWin.st.connected && podsWin.st.modes && podsWin.st.modes.length > 0
-                text: "listening mode"
-                color: Theme.muted
-                font.family: Theme.fontMain
-                font.pixelSize: 12
+            // --- SECTION 1 : NOISE CONTROL (Grille 2x2) ---
+            RowLayout {
+                Layout.fillWidth: true
+                Text {
+                    text: "noise control"
+                    color: Theme.muted
+                    font.family: Theme.fontMain
+                    font.pixelSize: 11
+                }
+                Item { Layout.fillWidth: true }
+                Text {
+                    text: "[n / a / t / o]"
+                    color: Theme.disabled
+                    font.family: Theme.fontMain
+                    font.pixelSize: 10
+                }
             }
 
-            // Boutons de modes (ANC, Adaptive, Transparency, Off)
-            ColumnLayout {
-                visible: podsWin.st.connected && podsWin.st.modes && podsWin.st.modes.length > 0
+            GridLayout {
                 Layout.fillWidth: true
-                spacing: 3
+                columns: 2
+                rowSpacing: 4
+                columnSpacing: 4
 
                 Repeater {
-                    model: (podsWin.st && podsWin.st.modes) ? podsWin.st.modes : []
+                    model: [
+                        { id: "anc",          label: "󰍬  noise cancel", key: "n" },
+                        { id: "adaptive",     label: "◐  adaptive",     key: "a" },
+                        { id: "transparency", label: "󰍭  transparency", key: "t" },
+                        { id: "off",          label: "·  off",          key: "o" }
+                    ]
                     delegate: Rectangle {
-                        required property string modelData
-                        property bool isAct: podsWin.st.mode === modelData
+                        required property var modelData
+                        property bool isAct: podsWin.st.mode === modelData.id
 
                         Layout.fillWidth: true
                         Layout.preferredHeight: 28
                         radius: 0
-                        color: isAct ? Theme.hoverBg : (modeMouse.containsMouse ? "#1b1b1e" : "transparent")
-                        border.color: isAct ? Theme.accent : Theme.sep
+                        color: isAct ? Theme.accent : (mMouse.containsMouse ? Theme.hoverBg : "transparent")
+                        border.color: isAct ? Theme.accent : (mMouse.containsMouse ? Theme.accent : Theme.sep)
                         border.width: 1
 
                         RowLayout {
                             anchors.fill: parent
-                            anchors.leftMargin: 10
-                            anchors.rightMargin: 10
+                            anchors.leftMargin: 8
+                            anchors.rightMargin: 8
 
                             Text {
-                                text: {
-                                    if (modelData === "anc") return "●  noise cancellation";
-                                    if (modelData === "adaptive") return "◐  adaptive";
-                                    if (modelData === "transparency") return "○  transparency";
-                                    return "·  off";
-                                }
-                                color: parent.parent.isAct ? Theme.accent : Theme.fg
-                                font.family: Theme.fontMain
-                                font.pixelSize: 12
-                            }
-
-                            Item { Layout.fillWidth: true }
-
-                            Text {
-                                text: "[" + modelData.charAt(0) + "]"
-                                color: Theme.muted
+                                text: modelData.label
+                                color: parent.parent.isAct ? Theme.bgSolid : Theme.fg
                                 font.family: Theme.fontMain
                                 font.pixelSize: 11
+                            }
+                            Item { Layout.fillWidth: true }
+                            Text {
+                                text: modelData.key
+                                color: parent.parent.isAct ? Theme.bgSolid : Theme.disabled
+                                font.family: Theme.fontMain
+                                font.pixelSize: 10
                             }
                         }
 
                         MouseArea {
-                            id: modeMouse
+                            id: mMouse
                             anchors.fill: parent
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
                             onPressed: {
                                 keyCatcher.forceActiveFocus();
-                                SysState.podsSetMode(modelData);
+                                Qt.callLater(() => SysState.podsSetMode(modelData.id));
                             }
                         }
                     }
                 }
             }
 
-            // Slider Adaptive Noise Level (affiché uniquement si Adaptive est actif)
+            // --- SECTION 2 : ADAPTIVE NOISE LEVEL (Curseur + 3 Préréglages) ---
             ColumnLayout {
-                visible: podsWin.st.connected && podsWin.st.mode === "adaptive"
                 Layout.fillWidth: true
-                spacing: 4
+                spacing: 5
+                opacity: podsWin.st.mode === "adaptive" ? 1.0 : 0.55
 
                 RowLayout {
                     Layout.fillWidth: true
                     Text {
-                        text: "adaptive noise"
+                        text: "adaptive noise level"
                         color: Theme.muted
                         font.family: Theme.fontMain
                         font.pixelSize: 11
                     }
                     Item { Layout.fillWidth: true }
                     Text {
-                        text: (podsWin.st.adaptiveLevel || 50) + "%"
-                        color: Theme.fg
+                        text: (podsWin.st.adaptiveLevel !== undefined ? podsWin.st.adaptiveLevel : 50) + "%"
+                        color: podsWin.st.mode === "adaptive" ? Theme.accent : Theme.fg
                         font.family: Theme.fontMain
                         font.pixelSize: 11
                     }
                 }
 
+                // Curseur 0-100%
                 Rectangle {
                     id: adaptTrack
                     Layout.fillWidth: true
@@ -328,7 +365,7 @@ PanelWindow {
                     radius: 0
 
                     Rectangle {
-                        width: Math.round(((podsWin.st.adaptiveLevel || 50) / 100.0) * parent.width)
+                        width: Math.round(((podsWin.st.adaptiveLevel !== undefined ? podsWin.st.adaptiveLevel : 50) / 100.0) * parent.width)
                         height: parent.height
                         color: Theme.accent
                         radius: 0
@@ -339,37 +376,100 @@ PanelWindow {
                         cursorShape: Qt.PointingHandCursor
                         function applyMouse(mx) {
                             let pct = Math.round(Math.max(0, Math.min(1, mx / adaptTrack.width)) * 100);
+                            if (podsWin.st.mode !== "adaptive") {
+                                SysState.podsSetMode("adaptive");
+                            }
                             SysState.podsSetAdaptive(pct);
                         }
                         onPressed: mouse => applyMouse(mouse.x)
                         onPositionChanged: mouse => { if (pressed) applyMouse(mouse.x); }
+                        onWheel: wheel => {
+                            let step = wheel.angleDelta.y > 0 ? 5 : -5;
+                            let next = Math.max(0, Math.min(100, (podsWin.st.adaptiveLevel || 50) + step));
+                            SysState.podsSetAdaptive(next);
+                        }
+                    }
+                }
+
+                // 3 Préréglages rapides (Quiet 20% / Balanced 50% / Ambient 80%)
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 4
+
+                    Repeater {
+                        model: [
+                            { label: "quiet 20%",    val: 20 },
+                            { label: "balanced 50%", val: 50 },
+                            { label: "ambient 80%",  val: 80 }
+                        ]
+                        delegate: Rectangle {
+                            required property var modelData
+                            property bool isCur: Math.abs((podsWin.st.adaptiveLevel || 50) - modelData.val) <= 5 && podsWin.st.mode === "adaptive"
+
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 22
+                            radius: 0
+                            color: isCur ? Theme.hoverBg : (preMouse.containsMouse ? "#1b1b1e" : "transparent")
+                            border.color: isCur ? Theme.accent : Theme.sep
+                            border.width: 1
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: modelData.label
+                                color: isCur ? Theme.accent : Theme.muted
+                                font.family: Theme.fontMain
+                                font.pixelSize: 10
+                            }
+
+                            MouseArea {
+                                id: preMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onPressed: {
+                                    if (podsWin.st.mode !== "adaptive") {
+                                        SysState.podsSetMode("adaptive");
+                                    }
+                                    Qt.callLater(() => SysState.podsSetAdaptive(modelData.val));
+                                }
+                            }
+                        }
                     }
                 }
             }
 
-            // Séparateur Options (Conversation Awareness, One-Bud ANC, Ear Detection)
             Rectangle {
-                visible: podsWin.st.connected
                 Layout.fillWidth: true
                 Layout.preferredHeight: 1
                 color: Theme.sep
             }
 
+            // --- SECTION 3 : AWARENESS & ANC OPTIONS ---
             // Conversation Awareness [c]
             RowLayout {
-                visible: podsWin.st.connected && podsWin.st.hasCa
                 Layout.fillWidth: true
+                spacing: 8
 
-                Text {
-                    text: "conversation awareness [c]"
-                    color: Theme.muted
-                    font.family: Theme.fontMain
-                    font.pixelSize: 12
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 1
+                    Text {
+                        text: "conversation awareness [c]"
+                        color: Theme.fg
+                        font.family: Theme.fontMain
+                        font.pixelSize: 12
+                    }
+                    Text {
+                        text: "lowers media volume when you speak"
+                        color: Theme.muted
+                        font.family: Theme.fontMain
+                        font.pixelSize: 10
+                    }
                 }
-                Item { Layout.fillWidth: true }
+
                 Rectangle {
-                    width: 48
-                    height: 22
+                    width: 52
+                    height: 24
                     radius: 0
                     color: podsWin.st.ca ? Theme.accent : (caMouse.containsMouse ? Theme.hoverBg : "transparent")
                     border.color: podsWin.st.ca ? Theme.accent : Theme.sep
@@ -382,31 +482,42 @@ PanelWindow {
                         font.family: Theme.fontMain
                         font.pixelSize: 11
                     }
+
                     MouseArea {
                         id: caMouse
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onPressed: SysState.podsToggleCa()
+                        onPressed: Qt.callLater(() => SysState.podsToggleCa())
                     }
                 }
             }
 
             // One-Bud ANC [b]
             RowLayout {
-                visible: podsWin.st.connected && podsWin.st.hasOneBud
                 Layout.fillWidth: true
+                spacing: 8
 
-                Text {
-                    text: "one-bud anc [b]"
-                    color: Theme.muted
-                    font.family: Theme.fontMain
-                    font.pixelSize: 12
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 1
+                    Text {
+                        text: "one-bud anc [b]"
+                        color: Theme.fg
+                        font.family: Theme.fontMain
+                        font.pixelSize: 12
+                    }
+                    Text {
+                        text: "allow noise cancellation with 1 pod"
+                        color: Theme.muted
+                        font.family: Theme.fontMain
+                        font.pixelSize: 10
+                    }
                 }
-                Item { Layout.fillWidth: true }
+
                 Rectangle {
-                    width: 48
-                    height: 22
+                    width: 52
+                    height: 24
                     radius: 0
                     color: podsWin.st.oneBud ? Theme.accent : (obMouse.containsMouse ? Theme.hoverBg : "transparent")
                     border.color: podsWin.st.oneBud ? Theme.accent : Theme.sep
@@ -419,49 +530,120 @@ PanelWindow {
                         font.family: Theme.fontMain
                         font.pixelSize: 11
                     }
+
                     MouseArea {
                         id: obMouse
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onPressed: SysState.podsToggleOneBud()
+                        onPressed: Qt.callLater(() => SysState.podsToggleOneBud())
                     }
                 }
             }
 
-            // Ear Detection [e]
-            RowLayout {
-                visible: podsWin.st.connected
+            Rectangle {
                 Layout.fillWidth: true
+                Layout.preferredHeight: 1
+                color: Theme.sep
+            }
 
+            // --- SECTION 4 : EAR DETECTION (Sélecteur 3 boutons) ---
+            RowLayout {
+                Layout.fillWidth: true
                 Text {
-                    text: "ear detection [e]"
+                    text: "ear detection (auto-pause) [e]"
                     color: Theme.muted
                     font.family: Theme.fontMain
-                    font.pixelSize: 12
+                    font.pixelSize: 11
                 }
-                Item { Layout.fillWidth: true }
-                Rectangle {
-                    width: 68
-                    height: 22
-                    radius: 0
-                    color: earMouse.containsMouse ? Theme.hoverBg : "transparent"
-                    border.color: Theme.sep
-                    border.width: 1
+            }
 
-                    Text {
-                        anchors.centerIn: parent
-                        text: podsWin.st.ear || "one"
-                        color: Theme.fg
-                        font.family: Theme.fontMain
-                        font.pixelSize: 11
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 4
+
+                Repeater {
+                    model: [
+                        { id: "one",  label: "1 pod out" },
+                        { id: "both", label: "both out" },
+                        { id: "off",  label: "never" }
+                    ]
+                    delegate: Rectangle {
+                        required property var modelData
+                        property bool isCur: (podsWin.st.ear || "one") === modelData.id
+
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 24
+                        radius: 0
+                        color: isCur ? Theme.accent : (earBtnMouse.containsMouse ? Theme.hoverBg : "transparent")
+                        border.color: isCur ? Theme.accent : Theme.sep
+                        border.width: 1
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: modelData.label
+                            color: isCur ? Theme.bgSolid : Theme.fg
+                            font.family: Theme.fontMain
+                            font.pixelSize: 11
+                        }
+
+                        MouseArea {
+                            id: earBtnMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onPressed: Qt.callLater(() => SysState.podsSetEar(modelData.id))
+                        }
                     }
-                    MouseArea {
-                        id: earMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onPressed: SysState.podsCycleEar()
+                }
+            }
+
+            // --- SECTION 5 : PROFIL AUDIO PIPEWIRE (A2DP High-Res vs Headset Mic) ---
+            RowLayout {
+                Layout.fillWidth: true
+                Text {
+                    text: "audio profile [m]"
+                    color: Theme.muted
+                    font.family: Theme.fontMain
+                    font.pixelSize: 11
+                }
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 4
+
+                Repeater {
+                    model: [
+                        { id: "a2dp", label: "󰎆  a2dp high-res" },
+                        { id: "hfp",  label: "󰍬  headset + mic" }
+                    ]
+                    delegate: Rectangle {
+                        required property var modelData
+                        property bool isCur: (podsWin.st.audioProfile || "a2dp") === modelData.id
+
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 24
+                        radius: 0
+                        color: isCur ? Theme.hoverBg : (profMouse.containsMouse ? "#1b1b1e" : "transparent")
+                        border.color: isCur ? Theme.accent : Theme.sep
+                        border.width: 1
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: modelData.label
+                            color: isCur ? Theme.accent : Theme.fg
+                            font.family: Theme.fontMain
+                            font.pixelSize: 11
+                        }
+
+                        MouseArea {
+                            id: profMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onPressed: Qt.callLater(() => SysState.podsSetProfile(modelData.id))
+                        }
                     }
                 }
             }

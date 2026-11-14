@@ -6,7 +6,7 @@ Text {
     property bool hovered: false
 
     text: SysState.audioText
-    color: paMouse.containsMouse ? Theme.accent : (SysState.audioMuted ? Theme.disabled : Theme.fg)
+    color: (paMouse.containsMouse || SysState.audioMenuOpen) ? Theme.accent : (SysState.audioMuted ? Theme.disabled : Theme.fg)
     font.family: Theme.fontMain
     font.pixelSize: 13
 
@@ -15,7 +15,7 @@ Text {
         interval: 400
         repeat: false
         onTriggered: {
-            if (paMouse.containsMouse) audioRoot.hovered = true;
+            if (paMouse.containsMouse && !SysState.audioMenuOpen) audioRoot.hovered = true;
         }
     }
 
@@ -34,19 +34,16 @@ Text {
             audioHoverTimer.stop();
             audioRoot.hovered = false;
             if (mouse.button === Qt.LeftButton) {
-                SysState.runCmd(SysState.scriptsDir + "/toggle-audio.sh");
+                let next = !SysState.audioMenuOpen;
+                SysState.closeAllPopups();
+                SysState.audioMenuOpen = next;
             } else if (mouse.button === Qt.RightButton) {
-                SysState.runCmd("pamixer -t || wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle || pactl set-sink-mute @DEFAULT_SINK@ toggle");
-                SysState.refresh();
+                SysState.audioToggleMute();
             }
         }
         onWheel: wheel => {
-            if (wheel.angleDelta.y > 0) {
-                SysState.runCmd("pamixer -i 2 || wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%+ || pactl set-sink-volume @DEFAULT_SINK@ +2%");
-            } else {
-                SysState.runCmd("pamixer -d 2 || wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%- || pactl set-sink-volume @DEFAULT_SINK@ -2%");
-            }
-            SysState.refresh();
+            let delta = wheel.angleDelta.y > 0 ? 2 : -2;
+            SysState.audioSetVolume(Math.max(0, Math.min(100, SysState.audioDetailState.vol + delta)));
         }
     }
 }

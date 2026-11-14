@@ -10,7 +10,7 @@ PanelWindow {
     visible: SysState.brightnessMenuOpen
     focusable: true
     WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.keyboardFocus: SysState.brightnessMenuOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
     exclusionMode: ExclusionMode.Ignore
     color: "transparent"
 

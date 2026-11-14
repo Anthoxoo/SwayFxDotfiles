@@ -5,21 +5,21 @@ Text {
     id: wifiRoot
     property bool hovered: false
 
-    text: (SysState.wifiCompact || !SysState.wifiConnected || SysState.wifiSsid === "")
-          ? SysState.wifiIcon
-          : (SysState.wifiIcon + " " + SysState.wifiSsid)
-    color: wifiMouse.containsMouse
+    text: (!SysState.wifiCompact && SysState.wifiSsid !== "")
+          ? (SysState.wifiIcon + " " + SysState.wifiSsid)
+          : SysState.wifiIcon
+    color: (wifiMouse.containsMouse || SysState.wifiMenuOpen)
            ? Theme.accent
            : (SysState.wifiConnected ? Theme.fg : Theme.disabled)
     font.family: Theme.fontMain
     font.pixelSize: 13
 
     Timer {
-        id: hoverTimer
-        interval: 450
+        id: wifiHoverTimer
+        interval: 400
         repeat: false
         onTriggered: {
-            if (wifiMouse.containsMouse) wifiRoot.hovered = true;
+            if (wifiMouse.containsMouse && !SysState.wifiMenuOpen) wifiRoot.hovered = true;
         }
     }
 
@@ -29,16 +29,18 @@ Text {
         hoverEnabled: true
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         cursorShape: Qt.PointingHandCursor
-        onEntered: hoverTimer.restart()
+        onEntered: wifiHoverTimer.restart()
         onExited: {
-            hoverTimer.stop();
+            wifiHoverTimer.stop();
             wifiRoot.hovered = false;
         }
         onPressed: mouse => {
-            hoverTimer.stop();
+            wifiHoverTimer.stop();
             wifiRoot.hovered = false;
             if (mouse.button === Qt.LeftButton) {
-                SysState.runCmd(SysState.scriptsDir + "/toggle-wifi.sh");
+                let next = !SysState.wifiMenuOpen;
+                SysState.closeAllPopups();
+                SysState.wifiMenuOpen = next;
             } else if (mouse.button === Qt.RightButton) {
                 SysState.wifiCompact = !SysState.wifiCompact;
             }

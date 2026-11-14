@@ -14,9 +14,16 @@ ShellRoot {
 
     AppLauncher {}
     CalendarMenu {}
+    WifiMenu {}
+    BluetoothMenu {}
+    MonitorsMenu {}
     BrightnessMenu {}
     OmaPodsMenu {}
+    AudioMenu {}
+    BatteryMenu {}
     PowerMenu {}
     BrightnessOsd {}
+    AudioOsd {}
     Notifications {}
+    LockScreen {}
 }

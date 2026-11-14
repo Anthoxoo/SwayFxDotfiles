@@ -10,7 +10,7 @@ PanelWindow {
     visible: SysState.powerMenuOpen
     focusable: true
     WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.keyboardFocus: SysState.powerMenuOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
     exclusionMode: ExclusionMode.Ignore
     color: "transparent"
 
@@ -25,7 +25,7 @@ PanelWindow {
 
     ListModel {
         id: powerActions
-        ListElement { label: "   lock";     cmd: "pidof hyprlock || hyprlock" }
+        ListElement { label: "   lock";     cmd: "~/.config/quickshell/scripts/lock.sh" }
         ListElement { label: "󰤄   suspend";  cmd: "systemctl suspend" }
         ListElement { label: "󰍃   logout";   cmd: "swaymsg exit" }
         ListElement { label: "󰜉   reboot";   cmd: "systemctl reboot" }

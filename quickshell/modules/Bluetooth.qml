@@ -6,16 +6,18 @@ Text {
     property bool hovered: false
 
     text: SysState.btText
-    color: btMouse.containsMouse ? Theme.accent : Theme.fg
+    color: (btMouse.containsMouse || SysState.btMenuOpen)
+           ? Theme.accent
+           : (SysState.btText === "󰂲" ? Theme.disabled : Theme.fg)
     font.family: Theme.fontMain
     font.pixelSize: 13
 
     Timer {
         id: btHoverTimer
-        interval: 450
+        interval: 400
         repeat: false
         onTriggered: {
-            if (btMouse.containsMouse) btRoot.hovered = true;
+            if (btMouse.containsMouse && !SysState.btMenuOpen) btRoot.hovered = true;
         }
     }
 
@@ -34,7 +36,9 @@ Text {
             btHoverTimer.stop();
             btRoot.hovered = false;
             if (mouse.button === Qt.LeftButton) {
-                SysState.runCmd(SysState.scriptsDir + "/toggle-bt.sh");
+                let next = !SysState.btMenuOpen;
+                SysState.closeAllPopups();
+                SysState.btMenuOpen = next;
             } else if (mouse.button === Qt.RightButton) {
                 SysState.btCompact = !SysState.btCompact;
                 SysState.refresh();

@@ -168,9 +168,9 @@ bindsym $mod+r mode "resize"
 #
     bindsym {
         # Volume
-        XF86AudioRaiseVolume exec pamixer -ui 2 && ~/.config/quickshell/scripts/status_refresh.sh
-        XF86AudioLowerVolume exec pamixer -ud 2 && ~/.config/quickshell/scripts/status_refresh.sh
-        XF86AudioMute exec pamixer --toggle-mute && ~/.config/quickshell/scripts/status_refresh.sh
+        XF86AudioRaiseVolume exec ~/.config/quickshell/scripts/volume.sh up 2
+        XF86AudioLowerVolume exec ~/.config/quickshell/scripts/volume.sh down 2
+        XF86AudioMute exec ~/.config/quickshell/scripts/volume.sh mute
 
         # Player
         XF86AudioPlay exec playerctl play-pause
