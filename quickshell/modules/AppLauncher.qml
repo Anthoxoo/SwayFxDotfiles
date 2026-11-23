@@ -69,9 +69,7 @@ PanelWindow {
 
     onVisibleChanged: {
         if (visible) {
-            if (!SysState.appList || SysState.appList.length === 0) {
-                SysState.refreshApps();
-            }
+            SysState.refreshAppsIfStale();
             query = "";
             selectedIndex = 0;
             searchInput.text = "";

@@ -47,7 +47,7 @@ Text {
                 SysState.podsMenuOpen = !SysState.podsMenuOpen;
             } else if (mouse.button === Qt.RightButton) {
                 if (SysState.podsState && SysState.podsState.connected) {
-                    SysState.podsCmd("cycle-mode");
+                    SysState.podsCycleMode();
                 }
             }
         }

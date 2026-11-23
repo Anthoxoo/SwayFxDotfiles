@@ -1,46 +1,127 @@
-@define-color accent_color #ff8800;
-@define-color accent_bg_color #ff8800;
-@define-color accent_fg_color #141416;
+/* ==========================================================================
+   Orange Black — GTK 4 / libadwaita (Nautilus, etc.)
+   Palette alignée sur ~/.config/quickshell/core/Theme.qml et le thème Zed
+   "Orange Black". Le pendant GTK 3 est ~/.config/gtk-3.0/gtk.css :
+   garder les deux fichiers synchronisés.
+   libadwaita ≥ 1.6 lit des variables CSS (--xxx) ; les @define-color
+   restent pour les applis GTK 4 sans libadwaita.
+   ========================================================================== */
 
-@define-color window_bg_color #141416;
-@define-color window_fg_color #e5e5e5;
-@define-color view_bg_color #141416;
-@define-color view_fg_color #e5e5e5;
+:root {
+    /* Accent */
+    --accent-color:        #ff8800;
+    --accent-bg-color:     #ff8800;
+    --accent-fg-color:     #141416;
 
-@define-color headerbar_bg_color #141416;
-@define-color headerbar_fg_color #e5e5e5;
-@define-color headerbar_border_color #2a2a2c;
-@define-color headerbar_backdrop_color #141416;
+    /* États */
+    --destructive-color:    #e05252;
+    --destructive-bg-color: #e05252;
+    --destructive-fg-color: #141416;
+    --error-color:          #e05252;
+    --error-bg-color:       #e05252;
+    --error-fg-color:       #141416;
+    --warning-color:        #ffaa33;
+    --warning-bg-color:     #ffaa33;
+    --warning-fg-color:     #141416;
+    --success-color:        #5eaab5;
+    --success-bg-color:     #5eaab5;
+    --success-fg-color:     #141416;
 
-@define-color sidebar_bg_color #19191c;
-@define-color sidebar_fg_color #e5e5e5;
-@define-color sidebar_backdrop_color #141416;
-@define-color secondary_sidebar_bg_color #19191c;
-@define-color secondary_sidebar_fg_color #e5e5e5;
+    /* Surfaces */
+    --window-bg-color:      #141416;
+    --window-fg-color:      #e5e5e5;
+    --view-bg-color:        #141416;
+    --view-fg-color:        #e5e5e5;
 
-@define-color card_bg_color #1e1e20;
-@define-color card_fg_color #e5e5e5;
-@define-color dialog_bg_color #141416;
-@define-color dialog_fg_color #e5e5e5;
-@define-color popover_bg_color #19191c;
-@define-color popover_fg_color #e5e5e5;
+    --headerbar-bg-color:           #141416;
+    --headerbar-fg-color:           #e5e5e5;
+    --headerbar-border-color:       #e5e5e5;
+    --headerbar-backdrop-color:     #141416;
+    --headerbar-shade-color:        #2a2a2c;
+    --headerbar-darker-shade-color: #2a2a2c;
 
-@define-color borders #2a2a2c;
+    --sidebar-bg-color:             #18181b;
+    --sidebar-fg-color:             #e5e5e5;
+    --sidebar-backdrop-color:       #18181b;
+    --sidebar-border-color:         #2a2a2c;
+    --sidebar-shade-color:          rgb(0 0 0 / 36%);
+    --secondary-sidebar-bg-color:       #18181b;
+    --secondary-sidebar-fg-color:       #e5e5e5;
+    --secondary-sidebar-backdrop-color: #18181b;
+    --secondary-sidebar-border-color:   #2a2a2c;
+    --secondary-sidebar-shade-color:    rgb(0 0 0 / 36%);
 
+    --card-bg-color:        #18181b;
+    --card-fg-color:        #e5e5e5;
+    --card-shade-color:     rgb(0 0 0 / 50%);
+    --dialog-bg-color:      #18181b;
+    --dialog-fg-color:      #e5e5e5;
+    --popover-bg-color:     #18181b;
+    --popover-fg-color:     #e5e5e5;
+    --popover-shade-color:  rgb(0 0 0 / 50%);
+    --thumbnail-bg-color:   #18181b;
+    --thumbnail-fg-color:   #e5e5e5;
+    --overview-bg-color:    #0e0e10;
+    --overview-fg-color:    #e5e5e5;
+    --active-toggle-bg-color: #2a2a2c;
+    --active-toggle-fg-color: #e5e5e5;
+    --shade-color:          rgb(0 0 0 / 50%);
+    --scrollbar-outline-color: rgb(0 0 0 / 95%);
+}
+
+/* Mêmes valeurs en couleurs nommées (GTK 4 sans libadwaita) */
+@define-color accent_color          #ff8800;
+@define-color accent_bg_color       #ff8800;
+@define-color accent_fg_color       #141416;
+@define-color destructive_color     #e05252;
+@define-color destructive_bg_color  #e05252;
+@define-color destructive_fg_color  #141416;
+@define-color error_color           #e05252;
+@define-color warning_color         #ffaa33;
+@define-color success_color         #5eaab5;
+@define-color window_bg_color       #141416;
+@define-color window_fg_color       #e5e5e5;
+@define-color view_bg_color         #141416;
+@define-color view_fg_color         #e5e5e5;
+@define-color headerbar_bg_color    #141416;
+@define-color headerbar_fg_color    #e5e5e5;
+@define-color sidebar_bg_color      #18181b;
+@define-color sidebar_fg_color      #e5e5e5;
+@define-color card_bg_color         #18181b;
+@define-color card_fg_color         #e5e5e5;
+@define-color dialog_bg_color       #18181b;
+@define-color dialog_fg_color       #e5e5e5;
+@define-color popover_bg_color      #18181b;
+@define-color popover_fg_color      #e5e5e5;
+@define-color borders               #2a2a2c;
+
+/* ==========================================================================
+   Retouches : angles carrés (comme sway, corner_radius 0), liseré orange
+   sur les menus, sélection de la barre latérale façon Quickshell.
+   ========================================================================== */
 window,
 .background,
 headerbar,
 popover > contents,
-.card {
-    border-radius: 0px;
+popover > arrow,
+.card,
+tooltip {
+    border-radius: 0;
 }
 
 popover > contents {
     border: 1px solid #ff8800;
 }
 
+tooltip {
+    background-color: #18181b;
+    color: #e5e5e5;
+    border: 1px solid #2a2a2c;
+}
+
 .navigation-sidebar row:selected {
-    background-color: rgba(255, 136, 0, 0.18);
+    background-color: rgb(255 136 0 / 18%);
     color: #ff8800;
-    border-left: 3px solid #ff8800;
+    box-shadow: inset 3px 0 #ff8800;
+    border-radius: 0;
 }

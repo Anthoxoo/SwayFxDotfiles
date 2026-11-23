@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
+import re
 import sys
 import json
 import subprocess
+
+# Pendant un scan Bluetooth (le sien ou celui de librepods), bluetoothctl intercale dans sa
+# sortie des événements du type « [CHG] Device AA:BB:… RSSI: … » : on ne garde que les vraies
+# lignes « Device <MAC> <nom> », et, pour `info` / `show`, les lignes indentées.
+DEVICE_LINE = re.compile(r"^Device ((?:[0-9A-F]{2}:){5}[0-9A-F]{2}) (.+)$", re.IGNORECASE)
 
 def run_out(cmd, timeout=4):
     try:
@@ -10,6 +16,26 @@ def run_out(cmd, timeout=4):
     except Exception:
         return ""
 
+def list_devices(*filters):
+    """[(mac, nom)] d'après `bluetoothctl devices [Paired|Connected]`."""
+    out = run_out(["bluetoothctl", "devices", *filters], timeout=3)
+    found = []
+    for line in out.splitlines():
+        m = DEVICE_LINE.match(line.strip())
+        if m:
+            found.append((m.group(1).upper(), m.group(2).strip()))
+    return found
+
+def own_lines(cmd, timeout=2):
+    """Lignes indentées (propres à l'appareil ou au contrôleur), sans les événements intercalés."""
+    return [l.strip() for l in run_out(cmd, timeout=timeout).splitlines() if l[:1] in ("\t", " ")]
+
+def device_info(mac):
+    return own_lines(["bluetoothctl", "info", mac])
+
+def controller_powered():
+    return "Powered: yes" in own_lines(["bluetoothctl", "show"])
+
 def get_status(do_scan=False):
     if do_scan:
         try:
@@ -17,10 +43,7 @@ def get_status(do_scan=False):
         except Exception:
             pass
 
-    show_out = run_out(["bluetoothctl", "show"], timeout=2)
-    powered = ("Powered: yes" in show_out)
-
-    if not powered:
+    if not controller_powered():
         print(json.dumps({
             "powered": False,
             "connectedCount": 0,
@@ -28,41 +51,26 @@ def get_status(do_scan=False):
         }), flush=True)
         return
 
-    paired_out = run_out(["bluetoothctl", "devices", "Paired"], timeout=2)
-    paired_macs = set()
-    for line in paired_out.splitlines():
-        parts = line.strip().split(" ", 2)
-        if len(parts) >= 2:
-            paired_macs.add(parts[1])
-
-    all_out = run_out(["bluetoothctl", "devices"], timeout=2)
+    paired_macs = {mac for mac, _ in list_devices("Paired")}
+    connected_macs = {mac for mac, _ in list_devices("Connected")}
     devices = []
-    conn_count = 0
 
-    for line in all_out.splitlines():
-        parts = line.strip().split(" ", 2)
-        if len(parts) < 3:
-            continue
-        mac, name = parts[1], parts[2].strip()
+    for mac, name in list_devices():
+        is_paired = mac in paired_macs
         # Ignorer les adresses MAC anonymes sans vrai nom si non appairées
-        if mac not in paired_macs and name.replace("-", ":") == mac:
+        if not is_paired and name.replace("-", ":").upper() == mac:
             continue
+        is_conn = mac in connected_macs
 
-        info = run_out(["bluetoothctl", "info", mac], timeout=2)
-        is_conn = ("Connected: yes" in info)
-        is_paired = (mac in paired_macs) or ("Paired: yes" in info)
-
+        # `bluetoothctl info` seulement pour la batterie des appareils connectés
         bat = -1
-        for iline in info.splitlines():
-            iline = iline.strip()
-            if iline.startswith("Battery Percentage:"):
-                try:
-                    bat = int(iline.split("(")[-1].split(")")[0])
-                except Exception:
-                    pass
-
         if is_conn:
-            conn_count += 1
+            for iline in device_info(mac):
+                if iline.startswith("Battery Percentage:"):
+                    try:
+                        bat = int(iline.split("(")[-1].split(")")[0])
+                    except Exception:
+                        pass
 
         devices.append({
             "mac": mac,
@@ -76,7 +84,7 @@ def get_status(do_scan=False):
 
     print(json.dumps({
         "powered": True,
-        "connectedCount": conn_count,
+        "connectedCount": len([d for d in devices if d["connected"]]),
         "devices": devices[:14]
     }), flush=True)
 
@@ -87,12 +95,11 @@ if __name__ == "__main__":
     elif cmd == "scan":
         get_status(True)
     elif cmd == "toggle-power":
-        show_out = run_out(["bluetoothctl", "show"], timeout=2)
-        target = "off" if "Powered: yes" in show_out else "on"
+        target = "off" if controller_powered() else "on"
         subprocess.run(["bluetoothctl", "power", target], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     elif cmd == "toggle-device" and len(sys.argv) >= 3:
         mac = sys.argv[2]
-        info = run_out(["bluetoothctl", "info", mac], timeout=2)
+        info = device_info(mac)
         if "Connected: yes" in info:
             subprocess.run(["bluetoothctl", "disconnect", mac], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=6)
         else:

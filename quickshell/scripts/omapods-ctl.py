@@ -1,15 +1,24 @@
 #!/usr/bin/env python3
+# Commandes AirPods pour Quickshell (core/SysState.qml).
+# L'état affiché (batteries, mode, réglages) est lu directement par Quickshell dans
+# $XDG_STATE_HOME/librepods/status.json ; ce script ne sert plus qu'aux actions et au profil audio.
+#   omapods-ctl.py profile                 -> "a2dp" ou "hfp"
+#   omapods-ctl.py noise:<mode> | adaptive:<0-100> | ca:on|off | onebud:on|off | ear:one|both|off
+#   omapods-ctl.py profile:a2dp|hfp | bt-toggle | reopen | cycle-mode
 import os
+import re
 import sys
 import json
 import subprocess
 
-STATE_DIR = os.environ.get("XDG_STATE_HOME", os.path.expanduser("~/.local/state"))
-STATUS_FILE = os.path.join(STATE_DIR, "librepods", "status.json")
 CACHE_FILE = os.path.expanduser("~/.cache/quickshell_pods_prefs.json")
 CTL_BIN = os.path.expanduser("~/.local/bin/librepods-ctl")
 if not os.path.exists(CTL_BIN):
     CTL_BIN = "librepods-ctl"
+
+# Pendant un scan Bluetooth, bluetoothctl intercale des événements « [CHG] Device … » dans sa
+# sortie : on ne garde que les vraies lignes « Device <MAC> <nom> » et les lignes indentées de `info`.
+DEVICE_LINE = re.compile(r"^Device ((?:[0-9A-F]{2}:){5}[0-9A-F]{2}) (.+)$", re.IGNORECASE)
 
 def load_prefs():
     try:
@@ -34,45 +43,34 @@ def save_prefs(prefs):
     except Exception:
         pass
 
-def is_daemon_running():
-    res = subprocess.run(["pgrep", "-x", "librepods"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    return res.returncode == 0
-
-def get_val(d, keys, default=None):
-    if not isinstance(d, dict):
-        return default
-    for k in keys:
-        if k in d and d[k] is not None:
-            return d[k]
-    return default
-
 def find_airpods_bt():
     """Détecte les AirPods via BlueZ (connectés ou appairés) et le profil PipeWire/PulseAudio."""
     mac, name, connected = "", "", False
     try:
-        res = subprocess.run(["bluetoothctl", "devices"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, timeout=2)
+        res = subprocess.run(["bluetoothctl", "devices"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, timeout=3)
         for line in res.stdout.splitlines():
-            parts = line.strip().split(" ", 2)
-            if len(parts) >= 3 and "airpods" in parts[2].lower():
-                cand_mac, cand_name = parts[1], parts[2]
-                info = subprocess.run(["bluetoothctl", "info", cand_mac], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, timeout=2).stdout
-                is_conn = "Connected: yes" in info
-                if is_conn or not mac:
-                    mac, name, connected = cand_mac, cand_name, is_conn
-                if is_conn:
-                    break
+            m = DEVICE_LINE.match(line.strip())
+            if not m or "airpods" not in m.group(2).lower():
+                continue
+            cand_mac, cand_name = m.group(1).upper(), m.group(2).strip()
+            info = subprocess.run(["bluetoothctl", "info", cand_mac], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, timeout=2).stdout
+            is_conn = "Connected: yes" in [l.strip() for l in info.splitlines() if l[:1] in ("\t", " ")]
+            if is_conn or not mac:
+                mac, name, connected = cand_mac, cand_name, is_conn
+            if is_conn:
+                break
     except Exception:
         pass
 
     profile = "a2dp"
     card_name = ""
     if mac:
-        card_Guess = "bluez_card." + mac.replace(":", "_")
+        card_guess = "bluez_card." + mac.replace(":", "_")
         try:
             cards = subprocess.run(["pactl", "list", "cards"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, timeout=2).stdout
-            if card_Guess in cards:
-                card_name = card_Guess
-                block = cards.split(card_Guess, 1)[1].split("Card #", 1)[0]
+            if card_guess in cards:
+                card_name = card_guess
+                block = cards.split(card_guess, 1)[1].split("Card #", 1)[0]
                 for line in block.splitlines():
                     if "Active Profile:" in line:
                         act = line.split(":", 1)[1].strip().lower()
@@ -84,160 +82,11 @@ def find_airpods_bt():
 
     return {"mac": mac, "name": name, "connected": connected, "profile": profile, "card": card_name}
 
-def parse_pod(raw, key_names):
-    for k in key_names:
-        v = raw.get(k)
-        if isinstance(v, dict):
-            avail = get_val(v, ["available", "connected", "isConnected"], True)
-            st = str(get_val(v, ["status", "state"], "")).lower()
-            chg = bool(get_val(v, ["charging", "isCharging", "is_charging"], False))
-            ear = bool(get_val(v, ["inEar", "in_ear", "wearing"], False))
-            lvl = get_val(v, ["battery", "level", "percent", "value"], -1)
-            lvl = int(lvl) if isinstance(lvl, (int, float)) else -1
-            if 0 < lvl <= 10 and get_val(v, ["scale"], 100) == 10:
-                lvl *= 10
-            if not avail or st == "disconnected" or (lvl <= 0 and not chg):
-                lvl = -1
-            return {"level": lvl, "charging": chg, "inEar": ear}
-        elif isinstance(v, (int, float)):
-            chg = bool(raw.get(f"{k}Charging", raw.get(f"{k}_charging", False)))
-            ear = bool(raw.get(f"{k}InEar", raw.get(f"{k}_in_ear", False)))
-            lvl = int(v)
-            if lvl <= 0 and not chg:
-                lvl = -1
-            return {"level": lvl, "charging": chg, "inEar": ear}
-    return {"level": -1, "charging": False, "inEar": False}
-
 def run_ctl(verb):
     try:
         subprocess.run([CTL_BIN, verb], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=3)
     except Exception:
         pass
-
-def read_status():
-    running = is_daemon_running()
-    bt = find_airpods_bt()
-    prefs = load_prefs()
-
-    raw = {}
-    if os.path.exists(STATUS_FILE):
-        try:
-            with open(STATUS_FILE, "r", encoding="utf-8") as f:
-                content = f.read().strip()
-            if content:
-                raw = json.loads(content.splitlines()[-1])
-                running = True
-        except Exception:
-            pass
-
-    bat_obj = raw.get("battery") if isinstance(raw.get("battery"), dict) else (raw.get("pods") if isinstance(raw.get("pods"), dict) else raw)
-    left = parse_pod(bat_obj, ["left", "leftPod", "left_pod", "L", "l"])
-    right = parse_pod(bat_obj, ["right", "rightPod", "right_pod", "R", "r"])
-    case = parse_pod(bat_obj, ["case", "caseBattery", "case_battery", "C", "c"])
-    single = parse_pod(bat_obj, ["headphone", "single", "main"])
-
-    active_levels = [p["level"] for p in (left, right, single) if p["level"] > 0]
-    explicit_conn = get_val(raw, ["connected", "isConnected", "active"], None)
-    state_str = str(get_val(raw, ["state", "status", "connectionState"], "")).lower()
-
-    if explicit_conn is False or state_str in ("disconnected", "offline"):
-        aap_connected = False
-    elif explicit_conn is True or len(active_levels) > 0:
-        aap_connected = True
-    else:
-        aap_connected = False
-
-    # Si connectés en Bluetooth mais que le démon AAP n'a pas encore accroché le socket L2CAP
-    connected = aap_connected or bt["connected"]
-
-    if not connected:
-        print(json.dumps({
-            "running": running,
-            "connected": False,
-            "aapReady": False,
-            "btMac": bt["mac"],
-            "name": (bt["name"] or "airpods").lower(),
-            "barPct": -1,
-            "modes": ["anc", "adaptive", "transparency", "off"]
-        }))
-        return
-
-    model_str = str(get_val(raw, ["model", "deviceModel", "product", "type"], bt["name"] or "AirPods 4 ANC"))
-    name_str = str(get_val(raw, ["name", "deviceName", "alias"], bt["name"] or model_str))
-    is_max = "max" in model_str.lower() or (single["level"] > 0 and left["level"] < 0 and right["level"] < 0)
-
-    mode = str(get_val(raw, ["listeningMode", "noiseMode", "noise", "mode", "ancMode"], prefs.get("mode", "anc"))).lower()
-    if mode in ("noise_cancellation", "noisecancellation", "nc"):
-        mode = "anc"
-    if mode not in ("anc", "adaptive", "transparency", "off"):
-        mode = prefs.get("mode", "anc")
-
-    caps = raw.get("capabilities") if isinstance(raw.get("capabilities"), dict) else raw
-    modes_list = get_val(caps, ["modes", "listeningModes", "supportedModes", "noiseModes"], None)
-    if not isinstance(modes_list, list) or len(modes_list) == 0:
-        if "pro 3" in model_str.lower():
-            modes_list = ["anc", "adaptive", "transparency"]
-        else:
-            modes_list = ["anc", "adaptive", "transparency", "off"]
-    else:
-        modes_list = [("anc" if m in ("noise_cancellation", "nc") else str(m).lower()) for m in modes_list]
-
-    has_ca = bool(get_val(caps, ["conversationAwareness", "hasConversationAwareness", "ca", "supportsCa"], True))
-    has_onebud = bool(get_val(caps, ["oneBudAnc", "hasOneBudAnc", "oneBud", "supportsOneBud"], not is_max))
-    has_adaptive = "adaptive" in modes_list
-
-    raw_ca = get_val(raw, ["conversationAwareness", "ca", "conversation_awareness"], None)
-    if isinstance(raw_ca, dict):
-        ca_val = bool(raw_ca.get("enabled", False))
-    elif raw_ca is not None:
-        ca_val = str(raw_ca).lower() in ("true", "1", "on", "yes", "enabled")
-    else:
-        ca_val = bool(prefs.get("ca", False))
-
-    raw_ob = get_val(raw, ["oneBudAnc", "oneBud", "one_bud_anc", "singlePodAnc"], None)
-    if isinstance(raw_ob, dict):
-        onebud_val = bool(raw_ob.get("enabled", False))
-    elif raw_ob is not None:
-        onebud_val = str(raw_ob).lower() in ("true", "1", "on", "yes", "enabled")
-    else:
-        onebud_val = bool(prefs.get("oneBud", True))
-
-    adaptive_lvl = int(get_val(raw, ["adaptiveLevel", "adaptiveNoiseLevel", "adaptive", "adaptive_level"], prefs.get("adaptiveLevel", 50)))
-    ear_mode = str(get_val(raw, ["earDetection", "ear_detection", "ear"], prefs.get("ear", "one"))).lower()
-    if ear_mode in ("never", "false", "0", "disabled"):
-        ear_mode = "off"
-    elif ear_mode not in ("one", "both", "off"):
-        ear_mode = "one"
-
-    lid_state = str(get_val(raw, ["caseLid", "lid", "lidState", "case_lid"], "")).lower()
-    bar_pct = min(active_levels) if active_levels else -1
-
-    out = {
-        "running": running,
-        "connected": True,
-        "aapReady": aap_connected,
-        "btMac": bt["mac"],
-        "audioProfile": bt["profile"],
-        "name": name_str,
-        "model": model_str,
-        "isMax": is_max,
-        "barPct": bar_pct,
-        "left": left,
-        "right": right,
-        "case": case,
-        "single": single,
-        "lid": lid_state,
-        "mode": mode,
-        "modes": modes_list,
-        "hasCa": has_ca,
-        "ca": ca_val,
-        "hasOneBud": has_onebud,
-        "oneBud": onebud_val,
-        "hasAdaptive": has_adaptive,
-        "adaptiveLevel": max(0, min(100, adaptive_lvl)),
-        "ear": ear_mode
-    }
-    print(json.dumps(out))
 
 def set_audio_profile(target_prof):
     bt = find_airpods_bt()
@@ -276,11 +125,14 @@ def set_audio_profile(target_prof):
         pass
 
 if __name__ == "__main__":
-    arg = sys.argv[1] if len(sys.argv) > 1 else "status"
+    arg = sys.argv[1] if len(sys.argv) > 1 else ""
     prefs = load_prefs()
 
-    if arg == "status":
-        read_status()
+    if arg == "":
+        print(f"usage: {sys.argv[0]} profile | noise:<mode> | adaptive:<n> | ca:on|off | onebud:on|off | ear:<one|both|off> | profile:<a2dp|hfp> | bt-toggle | reopen", file=sys.stderr)
+        sys.exit(1)
+    elif arg == "profile":
+        print(find_airpods_bt()["profile"])
     elif arg == "cycle-mode":
         order = ["anc", "adaptive", "transparency", "off"]
         cur = prefs.get("mode", "anc")

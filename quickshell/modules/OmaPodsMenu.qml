@@ -83,7 +83,7 @@ PanelWindow {
                 SysState.podsSetProfile(nextProf);
                 event.accepted = true;
             } else if (event.key === Qt.Key_R) {
-                SysState.podsCmd("reopen");
+                SysState.podsCtl("reopen");
                 event.accepted = true;
             } else if (event.key === Qt.Key_Left || event.key === Qt.Key_H) {
                 SysState.podsSetAdaptive(Math.max(0, (podsWin.st.adaptiveLevel || 50) - 5));
@@ -164,7 +164,7 @@ PanelWindow {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onPressed: Qt.callLater(() => SysState.podsCmd("reopen"))
+                        onPressed: Qt.callLater(() => SysState.podsCtl("reopen"))
                     }
                 }
 

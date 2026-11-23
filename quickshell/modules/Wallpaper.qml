@@ -35,6 +35,7 @@ Variants {
             let target = showA ? imgB : imgA;
             let visibleImg = showA ? imgA : imgB;
             if (visibleImg.source.toString() === url && visibleImg.status === Image.Ready) return;
+            releaseTimer.stop();
             pending = url;
             target.source = url;
             if (target.status === Image.Ready) swapTo(target);
@@ -44,6 +45,17 @@ Variants {
             if (img.source.toString() !== pending) return;
             showA = (img === imgA);
             pending = "";
+            releaseTimer.restart();
+        }
+
+        // Fondu terminé : on vide l'image cachée, sinon elle garde une image plein écran décodée en mémoire
+        Timer {
+            id: releaseTimer
+            interval: 750
+            repeat: false
+            onTriggered: {
+                if (wallWin.pending === "") (wallWin.showA ? imgB : imgA).source = "";
+            }
         }
 
         Connections {

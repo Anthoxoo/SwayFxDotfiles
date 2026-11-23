@@ -364,14 +364,28 @@ Singleton {
 
     function wifiConnect(ssid, pwd) {
         let escSsid = ssid.replace(/'/g, "'\\''");
-        let escPwd = (pwd || "").replace(/'/g, "'\\''");
-        if (escPwd !== "") {
-            root.runCmd("python3 " + root.scriptsDir + "/wifi-ctl.py connect '" + escSsid + "' '" + escPwd + "'");
+        if (pwd) {
+            // Natif (NetworkManager par D-Bus) : le mot de passe n'apparaît plus sur une ligne de
+            // commande, lisible par tous dans /proc pendant l'exécution de nmcli
+            let net = root.wifiNetworkByName(ssid);
+            if (net) {
+                net.connectWithPsk(pwd);
+            } else {
+                let escPwd = pwd.replace(/'/g, "'\\''");
+                root.runCmd("python3 " + root.scriptsDir + "/wifi-ctl.py connect '" + escSsid + "' '" + escPwd + "'");
+            }
         } else {
             root.runCmd("python3 " + root.scriptsDir + "/wifi-ctl.py connect '" + escSsid + "'");
         }
         reloadNetTimer.interval = 1800;
         reloadNetTimer.restart();
+    }
+
+    function wifiNetworkByName(ssid) {
+        if (!root.wifiDevice) return null;
+        let nets = root.wifiDevice.networks.values;
+        for (let i = 0; i < nets.length; i++) if (nets[i].name === ssid) return nets[i];
+        return null;
     }
 
     function wifiForget(ssid) {
@@ -743,85 +757,38 @@ Singleton {
     }
 
     // =====================================================================
-    // OmaPods (AirPods via librepods) — seul état encore interrogé périodiquement
+    // OmaPods (AirPods via librepods)
+    // Le démon réécrit $XDG_STATE_HOME/librepods/status.json à chaque changement (écriture
+    // atomique) et le supprime quand il s'arrête : on surveille ce fichier, rien n'est interrogé.
     // =====================================================================
-    function podsCmd(arg) {
-        runCmd("python3 " + root.scriptsDir + "/omapods-ctl.py '" + arg + "'");
-        podsRefreshTimer.restart();
+    readonly property string podsStatusPath: (Quickshell.env("XDG_STATE_HOME") || (Quickshell.env("HOME") + "/.local/state")) + "/librepods/status.json"
+    readonly property string podsCtlBin: Quickshell.env("HOME") + "/.local/bin/librepods-ctl"
+    property var podsRaw: null                // dernier status.json lu (null : démon arrêté)
+    property string podsAudioProfile: "a2dp"  // profil PipeWire (absent de status.json), relu à l'ouverture du menu
+    property var podsPending: ({})            // valeurs affichées d'avance, en attente de confirmation par le démon
+
+    FileView {
+        id: podsFile
+        path: root.podsStatusPath
+        watchChanges: true
+        printErrors: false
+        // text() est périmé dans le signal de changement : on passe par reload()
+        onFileChanged: reload()
+        onLoaded: {
+            try {
+                root.podsRaw = JSON.parse(text());
+            } catch (e) {
+                return;
+            }
+            root.rebuildPods();
+        }
+        onLoadFailed: {
+            root.podsRaw = null;
+            root.rebuildPods();
+        }
     }
 
-    function podsSetMode(m) {
-        let copy = Object.assign({}, root.podsState);
-        copy.mode = m;
-        root.podsState = copy;
-        podsCmd("noise:" + m);
-    }
-
-    function podsToggleCa() {
-        let nextVal = !(root.podsState && root.podsState.ca);
-        let copy = Object.assign({}, root.podsState);
-        copy.ca = nextVal;
-        root.podsState = copy;
-        podsCmd("ca:" + (nextVal ? "on" : "off"));
-    }
-
-    function podsToggleOneBud() {
-        let nextVal = !(root.podsState && root.podsState.oneBud);
-        let copy = Object.assign({}, root.podsState);
-        copy.oneBud = nextVal;
-        root.podsState = copy;
-        podsCmd("onebud:" + (nextVal ? "on" : "off"));
-    }
-
-    Timer {
-        id: podsAdaptTimer
-        property int targetVal: 50
-        interval: 40
-        repeat: false
-        onTriggered: root.podsCmd("adaptive:" + targetVal)
-    }
-
-    function podsSetAdaptive(val) {
-        let copy = Object.assign({}, root.podsState);
-        copy.adaptiveLevel = val;
-        root.podsState = copy;
-        podsAdaptTimer.targetVal = val;
-        podsAdaptTimer.restart();
-    }
-
-    function podsSetEar(earMode) {
-        let copy = Object.assign({}, root.podsState);
-        copy.ear = earMode;
-        root.podsState = copy;
-        podsCmd("ear:" + earMode);
-    }
-
-    function podsSetProfile(prof) {
-        let copy = Object.assign({}, root.podsState);
-        copy.audioProfile = prof;
-        root.podsState = copy;
-        podsCmd("profile:" + prof);
-    }
-
-    function podsCycleEar() {
-        let order = ["one", "both", "off"];
-        let cur = (root.podsState && root.podsState.ear) ? root.podsState.ear : "one";
-        let idx = (order.indexOf(cur) + 1) % order.length;
-        let nextEar = order[idx];
-        let copy = Object.assign({}, root.podsState);
-        copy.ear = nextEar;
-        root.podsState = copy;
-        podsCmd("ear:" + nextEar);
-    }
-
-    Timer {
-        id: podsRefreshTimer
-        interval: 250
-        repeat: false
-        onTriggered: podsPoller.running = true
-    }
-
-    // AirPods connectés en Bluetooth ? (natif, sans script) — sert à espacer l'interrogation
+    // AirPods connectés en Bluetooth ? (natif) — le lien audio peut précéder le lien AAP du démon
     readonly property bool airpodsBtConnected: {
         let devs = Bluetooth.devices.values;
         for (let i = 0; i < devs.length; i++) {
@@ -829,46 +796,193 @@ Singleton {
         }
         return false;
     }
-    onAirpodsBtConnectedChanged: podsRefreshTimer.restart()
-
-    Timer {
-        interval: root.podsMenuOpen ? 1500 : (root.airpodsBtConnected ? 4000 : 30000)
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: podsPoller.running = true
+    onAirpodsBtConnectedChanged: root.rebuildPods()
+    onPodsMenuOpenChanged: {
+        if (root.podsMenuOpen) {
+            podsFile.reload();
+            podsProfilePoller.running = true;
+        }
     }
 
+    function podsPod(o) {
+        if (!o || !o.available) return { level: -1, charging: false, inEar: false };
+        let chg = o.charging === true;
+        let lvl = typeof o.level === "number" ? Math.round(o.level) : -1;
+        if (lvl <= 0 && !chg) lvl = -1;
+        return { level: lvl, charging: chg, inEar: o.in_ear === true };
+    }
+
+    // Traduit status.json (schéma v1 de librepods) vers l'état attendu par la barre et le menu
+    function rebuildPods() {
+        let running = root.podsRaw !== null && typeof root.podsRaw === "object";
+        let r = running ? root.podsRaw : ({});
+        let aap = r.connected === true;
+        let modes = ["anc"];
+        if (r.supports_adaptive !== false) modes.push("adaptive");
+        modes.push("transparency");
+        if (r.supports_noise_off !== false) modes.push("off");
+
+        let st = {
+            running: running,
+            connected: aap || root.airpodsBtConnected,
+            aapReady: aap,
+            name: r.device_name || "airpods",
+            model: r.model_name || "",
+            isMax: r.is_headset === true,
+            left: root.podsPod(r.left),
+            right: root.podsPod(r.right),
+            case: root.podsPod(r.case),
+            single: root.podsPod(r.headset),
+            mode: ({ 0: "off", 1: "anc", 2: "transparency", 3: "adaptive" })[r.noise_mode] || "",
+            modes: modes,
+            ca: r.conversational_awareness === true,
+            oneBud: r.one_bud_anc_mode === true,
+            adaptiveLevel: typeof r.adaptive_noise_level === "number" ? r.adaptive_noise_level : 50,
+            ear: ["one", "both", "off"][r.ear_detection_behavior] || "one",
+            audioProfile: root.podsAudioProfile,
+            barPct: -1
+        };
+        let levels = [st.left.level, st.right.level, st.single.level].filter(l => l > 0);
+        if (levels.length > 0) st.barPct = Math.min.apply(null, levels);
+
+        // Valeurs envoyées mais pas encore confirmées : on les garde jusqu'à ce que le démon soit d'accord
+        let pending = root.podsPending;
+        let still = {};
+        let confirmed = false;
+        for (let k in pending) {
+            if (st[k] === pending[k]) {
+                confirmed = true;
+            } else {
+                st[k] = pending[k];
+                still[k] = pending[k];
+            }
+        }
+        if (confirmed) root.podsPending = still;
+
+        let js = JSON.stringify(st);
+        if (js === root.lastPodsJson) return;
+        root.lastPodsJson = js;
+        root.podsState = st;
+
+        if (!running) {
+            root.podsTooltipHtml = Theme.tipMuted("󱡏  daemon off");
+        } else if (!st.connected) {
+            root.podsTooltipHtml = Theme.tipMuted("󱡏  disconnected");
+        } else {
+            let pct = p => p.level > 0 ? (p.level + "%") : "-";
+            let rows = [Theme.tipTitle("󱡏  " + st.name.toLowerCase())];
+            if (st.isMax) {
+                rows.push(Theme.tipRow("battery", pct(st.single)));
+            } else {
+                rows.push(Theme.tipRow("left", pct(st.left)), Theme.tipRow("right", pct(st.right)), Theme.tipRow("case", pct(st.case)));
+            }
+            rows.push(Theme.tipRow("mode", st.mode || "-"));
+            root.podsTooltipHtml = Theme.tipBlock(rows);
+        }
+    }
+
+    // Actions : les verbes du démon partent directement vers librepods-ctl ; le profil audio et
+    // la connexion Bluetooth passent par omapods-ctl.py
+    function podsCtl(verb) {
+        root.runCmd("'" + root.podsCtlBin + "' " + verb);
+    }
+
+    function podsCmd(arg) {
+        root.runCmd("python3 " + root.scriptsDir + "/omapods-ctl.py '" + arg + "'");
+    }
+
+    // Affiche la valeur tout de suite ; si le démon ne la confirme pas, l'état réel revient après 4 s
+    function podsHold(field, value) {
+        let p = Object.assign({}, root.podsPending);
+        p[field] = value;
+        root.podsPending = p;
+        podsSettleTimer.restart();
+        root.rebuildPods();
+    }
+
+    Timer {
+        id: podsSettleTimer
+        interval: 4000
+        repeat: false
+        onTriggered: {
+            root.podsPending = ({});
+            root.rebuildPods();
+        }
+    }
+
+    function podsSetMode(m) {
+        root.podsHold("mode", m);
+        root.podsCtl("noise:" + m);
+    }
+
+    // Clic droit sur la barre : mode suivant parmi ceux que le modèle prend en charge
+    function podsCycleMode() {
+        let st = root.podsState;
+        if (!st || !st.connected) return;
+        let order = (st.modes && st.modes.length > 0) ? st.modes : ["anc", "adaptive", "transparency", "off"];
+        root.podsSetMode(order[(order.indexOf(st.mode) + 1) % order.length]);
+    }
+
+    function podsToggleCa() {
+        let v = !(root.podsState && root.podsState.ca);
+        root.podsHold("ca", v);
+        root.podsCtl("ca:" + (v ? "on" : "off"));
+    }
+
+    function podsToggleOneBud() {
+        let v = !(root.podsState && root.podsState.oneBud);
+        root.podsHold("oneBud", v);
+        root.podsCtl("onebud:" + (v ? "on" : "off"));
+    }
+
+    Timer {
+        id: podsAdaptTimer
+        property int targetVal: 50
+        interval: 40
+        repeat: false
+        onTriggered: root.podsCtl("adaptive:" + targetVal)
+    }
+
+    function podsSetAdaptive(val) {
+        root.podsHold("adaptiveLevel", val);
+        podsAdaptTimer.targetVal = val;
+        podsAdaptTimer.restart();
+    }
+
+    function podsSetEar(earMode) {
+        root.podsHold("ear", earMode);
+        root.podsCtl("ear:" + earMode);
+    }
+
+    function podsCycleEar() {
+        let order = ["one", "both", "off"];
+        let cur = (root.podsState && root.podsState.ear) ? root.podsState.ear : "one";
+        root.podsSetEar(order[(order.indexOf(cur) + 1) % order.length]);
+    }
+
+    function podsSetProfile(prof) {
+        root.podsAudioProfile = prof;
+        root.rebuildPods();
+        root.podsCmd("profile:" + prof);
+        podsProfileTimer.restart();
+    }
+
+    // Profil audio réel (pactl), relu à l'ouverture du menu et après un changement
+    Timer {
+        id: podsProfileTimer
+        interval: 2000
+        repeat: false
+        onTriggered: podsProfilePoller.running = true
+    }
     Process {
-        id: podsPoller
-        command: ["python3", root.scriptsDir + "/omapods-ctl.py", "status"]
+        id: podsProfilePoller
+        command: ["python3", root.scriptsDir + "/omapods-ctl.py", "profile"]
         stdout: StdioCollector {
             onStreamFinished: {
-                let raw = text.replace(/\n/g, "").trim();
-                if (raw === "") raw = '{"running":false,"connected":false,"barPct":-1,"modes":[]}';
-                try {
-                    let ps = JSON.parse(raw);
-                    if (raw !== root.lastPodsJson) {
-                        root.lastPodsJson = raw;
-                        root.podsState = ps;
-                    }
-                    if (!ps.running) {
-                        root.podsTooltipHtml = Theme.tipMuted("󱡏  daemon off");
-                    } else if (!ps.connected) {
-                        root.podsTooltipHtml = Theme.tipMuted("󱡏  disconnected");
-                    } else {
-                        let lStr = (ps.left && ps.left.level > 0) ? (ps.left.level + "%") : "-";
-                        let rStr = (ps.right && ps.right.level > 0) ? (ps.right.level + "%") : "-";
-                        let cStr = (ps.case && ps.case.level > 0) ? (ps.case.level + "%") : "-";
-                        root.podsTooltipHtml = Theme.tipBlock([
-                            Theme.tipTitle("󱡏  " + (ps.name || "airpods").toLowerCase()),
-                            Theme.tipRow("left", lStr),
-                            Theme.tipRow("right", rStr),
-                            Theme.tipRow("case", cStr),
-                            Theme.tipRow("mode", ps.mode || "off")
-                        ]);
-                    }
-                } catch (e) {}
+                let p = text.trim();
+                if (p !== "a2dp" && p !== "hfp") return;
+                root.podsAudioProfile = p;
+                root.rebuildPods();
             }
         }
     }
@@ -929,16 +1043,14 @@ Singleton {
         ]);
     }
 
+    // Affiche la valeur tout de suite et l'applique au plus toutes les 50 ms pendant un glissement :
+    // quand le minuteur expire, c'est toujours la dernière valeur demandée qui part.
     function setBrightness(val, showOsdPopup) {
         let clamped = Math.max(1, Math.min(100, Math.round(val)));
         updateBrightLabel(clamped);
+        brightApplyTimer.targetVal = clamped;
+        if (!brightApplyTimer.running) brightApplyTimer.start();
         if (showOsdPopup) triggerOsd();
-    }
-
-    function setBrightnessAndApply(val, showOsdPopup) {
-        setBrightness(val, showOsdPopup);
-        brightApplyTimer.targetVal = Math.max(1, Math.min(100, Math.round(val)));
-        brightApplyTimer.restart();
     }
 
     function stepBrightness(delta) {
@@ -972,7 +1084,7 @@ Singleton {
     Timer {
         id: brightApplyTimer
         property int targetVal: 100
-        interval: 25
+        interval: 50
         repeat: false
         onTriggered: {
             root.runCmd("brightnessctl -c backlight set " + targetVal + "% -q");
@@ -1010,7 +1122,7 @@ Singleton {
 
     // Force la relecture des états non natifs (écouteurs, écrans, IP, luminosité)
     function refresh() {
-        podsPoller.running = true;
+        podsFile.reload();
         monitorsPoller.running = true;
         ipPoller.running = true;
         blCurView.reload();
@@ -1018,6 +1130,14 @@ Singleton {
 
     function refreshApps() {
         appsPoller.running = true;
+    }
+
+    // À l'ouverture du lanceur : relit la liste si elle a plus d'une minute (applis installées ou
+    // supprimées entre-temps). apps.py coûte ~1 s : on ne le relance plus en boucle en arrière-plan.
+    property double appsLoadedAt: 0
+    property string lastAppsJson: ""
+    function refreshAppsIfStale() {
+        if (!root.appList || root.appList.length === 0 || Date.now() - root.appsLoadedAt > 60000) root.refreshApps();
     }
 
     Timer {
@@ -1032,17 +1152,15 @@ Singleton {
         command: ["python3", root.scriptsDir + "/apps.py"]
         stdout: SplitParser {
             onRead: data => {
+                let raw = data.trim();
+                root.appsLoadedAt = Date.now();
+                if (raw === root.lastAppsJson) return;  // inchangée : le lanceur ouvert n'est pas réinitialisé
                 try {
-                    root.appList = JSON.parse(data.trim());
+                    root.appList = JSON.parse(raw);
+                    root.lastAppsJson = raw;
                 } catch (e) {}
             }
         }
-    }
-    Timer {
-        interval: 60000
-        running: true
-        repeat: true
-        onTriggered: appsPoller.running = true
     }
 
     function formatWindow(appId, title) {

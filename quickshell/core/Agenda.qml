@@ -56,8 +56,9 @@ Singleton {
         return root.byDay[root.dayKey(d)] !== undefined;
     }
 
-    // "09:00–10:30" ou "all day"
+    // "09:00–10:30", "all day" ou "task" (Google Tasks : date seule)
     function timeRange(ev, day) {
+        if (ev.kind === "task") return "task";
         if (ev.allDay) return "all day";
         let s = new Date(ev.start), e = new Date(ev.end);
         let fmt = t => String(t.getHours()).padStart(2, "0") + ":" + String(t.getMinutes()).padStart(2, "0");
