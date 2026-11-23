@@ -1,0 +1,105 @@
+diff --git a/daemon/ble/blemanager.cpp b/daemon/ble/blemanager.cpp
+index 9d9188d..a323bcc 100644
+--- a/daemon/ble/blemanager.cpp
++++ b/daemon/ble/blemanager.cpp
+@@ -8,6 +8,14 @@
+ // Fixed header data[0] through data[10], then a 16-byte encrypted payload.
+ static constexpr int proximityPairingBytes = 11 + 16;
+ 
++// AirPods advertise several times a second while out of the case or with the lid open, so a
++// 10 s window catches them. Each window still costs a burst of D-Bus traffic (every device in
++// range is re-added, then dropped again by BlueZ once discovery stops), so windows are spaced
++// five minutes apart. This only runs while the control link is down; startScan() opens a
++// window at once on disconnect and on resume.
++static constexpr int scanWindowMs = 10000;
++static constexpr int scanPauseMs = 290000;
++
+ AirpodsTrayApp::Enums::AirPodsModel getModelName(quint16 modelId)
+ {
+     using namespace AirpodsTrayApp::Enums;
+@@ -91,7 +99,16 @@ QString getConnectionStateName(BleInfo::ConnectionState state)
+ BleManager::BleManager(QObject *parent) : QObject(parent)
+ {
+     discoveryAgent = new QBluetoothDeviceDiscoveryAgent(this);
+-    discoveryAgent->setLowEnergyDiscoveryTimeout(0); // Continuous scanning
++    // Each window ends by itself and emits finished(); onScanFinished() schedules the next one.
++    discoveryAgent->setLowEnergyDiscoveryTimeout(scanWindowMs);
++
++    pauseTimer = new QTimer(this);
++    pauseTimer->setSingleShot(true);
++    pauseTimer->setInterval(scanPauseMs);
++    connect(pauseTimer, &QTimer::timeout, this, [this]() {
++        if (scanWanted)
++            discoveryAgent->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
++    });
+ 
+     connect(discoveryAgent, &QBluetoothDeviceDiscoveryAgent::deviceDiscovered,
+             this, &BleManager::onDeviceDiscovered);
+@@ -113,18 +130,25 @@ BleManager::~BleManager()
+ void BleManager::startScan()
+ {
+     LOG_DEBUG("Starting BLE scan...");
++    scanWanted = true;
++    pauseTimer->stop();
++    // A no-op while a window is already open.
+     discoveryAgent->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
+ }
+ 
+ void BleManager::stopScan()
+ {
+     LOG_DEBUG("Stopping BLE scan...");
++    scanWanted = false;
++    pauseTimer->stop();
+     discoveryAgent->stop();
+ }
+ 
+ bool BleManager::isScanning() const
+ {
+-    return discoveryAgent->isActive();
++    // Callers decide whether to stop or restore scanning from this, so a pause between two
++    // windows still counts as scanning.
++    return scanWanted;
+ }
+ 
+ void BleManager::onDeviceDiscovered(const QBluetoothDeviceInfo &info)
+@@ -228,10 +252,9 @@ void BleManager::onDeviceDiscovered(const QBluetoothDeviceInfo &info)
+ 
+ void BleManager::onScanFinished()
+ {
+-    if (discoveryAgent->isActive())
+-    {
+-        discoveryAgent->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
+-    }
++    // stop() emits canceled() rather than finished(), so this is a window that timed out.
++    if (scanWanted)
++        pauseTimer->start();
+ }
+ 
+ void BleManager::onErrorOccurred(QBluetoothDeviceDiscoveryAgent::Error error)
+diff --git a/daemon/ble/blemanager.h b/daemon/ble/blemanager.h
+index 53a9ece..bc4150b 100644
+--- a/daemon/ble/blemanager.h
++++ b/daemon/ble/blemanager.h
+@@ -72,6 +72,7 @@ public:
+ 
+     void startScan();
+     void stopScan();
++    // True from startScan() to stopScan(), including the pauses between two scan windows.
+     bool isScanning() const;
+ 
+ private slots:
+@@ -88,6 +89,13 @@ private:
+     // that start/stop/isScan would dereference. Real assignment
+     // happens in BleManager::BleManager() via parented `new`.
+     QBluetoothDeviceDiscoveryAgent *discoveryAgent = nullptr;
++
++    // Discovery runs in windows rather than continuously. A continuous LE scan makes BlueZ
++    // publish every advertisement in range over D-Bus (RSSI and manufacturer data, thousands
++    // of devices an hour in a busy place), and every Bluetooth client on the bus has to
++    // process all of it.
++    QTimer *pauseTimer = nullptr;
++    bool scanWanted = false;
+ };
+ 
+ #endif // BLEMANAGER_H
+\ No newline at end of file
