@@ -14,8 +14,16 @@ Ce dossier ne contient que mon patch :
   Quickshell passait de 9,7 % à 0,7 % de CPU, et son journal en RAM de ~20 à ~4 Mo/h.
   Les durées se règlent avec `scanWindowMs` / `scanPauseMs` dans `daemon/ble/blemanager.cpp`.
 
+- `librepods.service` : lance le démon en `--headless`. Sans ça il chargeait son interface
+  Qt/QML sur la plateforme `offscreen`, où elle ne s'affiche jamais, et se réveillait toutes
+  les 10 ms. Mesuré : 3,5 % de CPU et 92 Mo avant, 0,05 % et 44 Mo après. Coupe aussi les
+  logs de debug du scan BLE (plusieurs lignes par seconde dans le journal).
+- `bin/omarchy` : en headless, librepods n'envoie ses notifications (batterie faible d'un
+  AirPod, déconnexion) que via la commande `omarchy`. Ce relais, présent uniquement dans le
+  PATH du service, les transmet à `notify-send` (donc à Quickshell).
+
 Installation (clone omarchy-pods si besoin, applique le patch, compile, installe dans
-`~/.local` et redémarre le service) :
+`~/.local`, installe le service et le relais, redémarre le service) :
 
 ```sh
 ./librepods/install.sh

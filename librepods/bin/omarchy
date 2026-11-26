@@ -1,0 +1,16 @@
+#!/bin/sh
+# librepods sends its notifications (AirPod low battery, disconnected) through
+# `omarchy notification send --app-name <app> -g <glyph> <title> <message>`, and drops them
+# when running --headless without omarchy. This relay is only on the service's PATH
+# (see librepods.service) and forwards them to the notification server (Quickshell).
+[ "$1 $2" = "notification send" ] || exit 0
+shift 2
+app=AirPods
+while [ $# -gt 2 ]; do
+    case $1 in
+        --app-name) app=$2; shift 2 ;;
+        -g) shift 2 ;;
+        *) shift ;;
+    esac
+done
+exec notify-send -a "$app" -i audio-headphones "$1" "$2"

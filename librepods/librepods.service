@@ -1,0 +1,21 @@
+[Unit]
+Description=LibrePods AirPods daemon (OmaPods)
+After=bluetooth.target pipewire.service
+
+[Service]
+Type=simple
+# --headless: no Qt GUI/QML. Without it the daemon loaded its window on the offscreen platform
+# (never visible) and woke up every 10 ms: 3.5% CPU and 92 MB, vs 0.1% and 44 MB headless.
+ExecStart=%h/.local/bin/librepods --headless
+Restart=on-failure
+RestartSec=2
+Environment=XDG_STATE_HOME=%h/.local/state
+# The BLE advertisement debug line fires several times a second during scans.
+Environment=QT_LOGGING_RULES=openpods.debug=false
+# Private PATH: ~/.local/share/librepods/bin/omarchy relays notifications to notify-send.
+Environment=PATH=%h/.local/share/librepods/bin:%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+# Status file carries the AirPods identity: nothing the daemon creates is world-readable.
+UMask=0077
+
+[Install]
+WantedBy=default.target

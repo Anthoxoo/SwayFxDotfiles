@@ -22,6 +22,9 @@ fi
 cmake -S daemon -B daemon/build -G Ninja -DBUILD_TESTING=OFF
 cmake --build daemon/build
 cmake --install daemon/build --prefix "$HOME/.local"
+# Service headless + relais de notifications (voir README)
+install -Dm755 "$here/bin/omarchy" "$HOME/.local/share/librepods/bin/omarchy"
+install -Dm644 "$here/librepods.service" "$HOME/.config/systemd/user/librepods.service"
 systemctl --user daemon-reload
 systemctl --user enable librepods.service
 systemctl --user restart librepods.service

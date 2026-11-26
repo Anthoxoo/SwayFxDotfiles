@@ -82,9 +82,6 @@ PanelWindow {
                 let nextProf = (podsWin.st.audioProfile === "hfp") ? "a2dp" : "hfp";
                 SysState.podsSetProfile(nextProf);
                 event.accepted = true;
-            } else if (event.key === Qt.Key_R) {
-                SysState.podsCtl("reopen");
-                event.accepted = true;
             } else if (event.key === Qt.Key_Left || event.key === Qt.Key_H) {
                 SysState.podsSetAdaptive(Math.max(0, (podsWin.st.adaptiveLevel || 50) - 5));
                 event.accepted = true;
@@ -127,7 +124,7 @@ PanelWindow {
             anchors.margins: 12
             spacing: 10
 
-            // --- EN-TÊTE : Modèle + Boutons Resync [r] & Connect/Disconnect ---
+            // --- EN-TÊTE : Modèle + Bouton Connect/Disconnect ---
             RowLayout {
                 Layout.fillWidth: true
                 spacing: 6
@@ -139,33 +136,6 @@ PanelWindow {
                     font.pixelSize: 13
                     elide: Text.ElideRight
                     Layout.fillWidth: true
-                }
-
-                // Bouton Resync AAP [r]
-                Rectangle {
-                    visible: Boolean(podsWin.st.connected)
-                    width: 24
-                    height: 20
-                    radius: 0
-                    color: resyncMouse.containsMouse ? Theme.hoverBg : "transparent"
-                    border.color: resyncMouse.containsMouse ? Theme.accent : Theme.sep
-                    border.width: 1
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: "󰑐"
-                        color: resyncMouse.containsMouse ? Theme.accent : Theme.muted
-                        font.family: Theme.fontMain
-                        font.pixelSize: 11
-                    }
-
-                    MouseArea {
-                        id: resyncMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onPressed: Qt.callLater(() => SysState.podsCtl("reopen"))
-                    }
                 }
 
                 // Bouton Connect / Disconnect Bluetooth
