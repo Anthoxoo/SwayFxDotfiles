@@ -1,7 +1,7 @@
--- Colorscheme "theme" : suit le thème global (~/.config/themes/current/palette.json),
--- le même que Quickshell, sway, GTK et alacritty. `theme set <id>` envoie SIGUSR1 aux nvim
--- ouverts, qui rechargent ce fichier (voir lua/config/autocmds.lua).
--- Repli sur colors/orange-black.lua si la palette est absente ou illisible.
+-- "theme" colorscheme: follows the global theme (~/.config/themes/current/palette.json),
+-- the same as Quickshell, sway, GTK and alacritty. `theme set <id>` sends SIGUSR1 to running
+-- nvim instances, which reload this file (see lua/config/autocmds.lua).
+-- Falls back to colors/orange-black.lua if the palette is missing or unreadable.
 
 local path = vim.fn.expand("~/.config/themes/current/palette.json")
 local ok, p = pcall(function()
@@ -16,34 +16,34 @@ vim.cmd("highlight clear")
 if vim.fn.exists("syntax_on") == 1 then
   vim.cmd("syntax reset")
 end
-vim.o.background = p.mode == "light" and "light" or "dark"
+vim.o.background = "dark"
 vim.o.termguicolors = true
 vim.g.colors_name = "theme"
 
 local c = {
   -- surfaces
-  bg_dark = p.inset, -- panneaux, barre d'état, onglets
-  bg = p.background, -- éditeur
+  bg_dark = p.inset, -- panels, status line, tabs
+  bg = p.background, -- editor
   bg_float = p.surface, -- popups, menus
-  bg_line = p.row_hover, -- ligne courante
+  bg_line = p.row_hover, -- current line
   bg_hover = p.hover,
   bg_active = p.separator,
   border = p.border,
   guide = p.hover,
   guide_active = p.guide_active,
-  -- texte
+  -- text
   fg = p.editor_fg,
   fg_bright = p.foreground,
   muted = p.muted,
   comment = p.comment,
   faint = p.placeholder,
   line_nr = p.line_nr,
-  -- accents / états (noms hérités d'Orange Black : orange = accent, teal = succès)
+  -- accents / states (names inherited from Orange Black: orange = accent, teal = success)
   orange = p.accent,
   red = p.urgent,
   yellow = p.warning,
   teal = p.success,
-  -- syntaxe
+  -- syntax
   keyword = p.keyword,
   func = p["function"],
   type = p.type,
@@ -56,7 +56,7 @@ local c = {
   operator = p.operator,
   punct = p.punctuation,
   bracket = p.bracket,
-  -- fonds pré-mélangés (calculés par le script de thème)
+  -- pre-blended backgrounds (computed by the theme script)
   visual = p.visual,
   search = p.search,
   match_paren = p.match_paren,
@@ -75,7 +75,7 @@ local hl = function(group, opts)
 end
 
 local groups = {
-  -- ---------------------------------------------------------------- éditeur
+  -- ---------------------------------------------------------------- editor
   Normal = { fg = c.fg, bg = c.bg },
   NormalNC = { fg = c.fg, bg = c.bg },
   NormalFloat = { fg = c.fg, bg = c.bg_float },
@@ -122,7 +122,7 @@ local groups = {
   WarningMsg = { fg = c.yellow },
   WildMenu = { fg = c.bg, bg = c.orange },
   QuickFixLine = { bg = c.bg_hover },
-  -- barre d'état / onglets
+  -- status line / tabs
   StatusLine = { fg = c.fg, bg = c.bg_dark },
   StatusLineNC = { fg = c.faint, bg = c.bg_dark },
   TabLine = { fg = c.muted, bg = c.bg_dark },
@@ -130,7 +130,7 @@ local groups = {
   TabLineSel = { fg = c.fg_bright, bg = c.bg },
   WinBar = { fg = c.muted, bg = c.bg },
   WinBarNC = { fg = c.faint, bg = c.bg },
-  -- menus de complétion
+  -- completion menus
   Pmenu = { fg = c.fg, bg = c.bg_float },
   PmenuSel = { fg = c.fg_bright, bg = c.bg_hover },
   PmenuKind = { fg = c.type, bg = c.bg_float },
@@ -141,7 +141,7 @@ local groups = {
   PmenuThumb = { bg = c.bg_active },
   PmenuMatch = { fg = c.orange, bold = true },
   PmenuMatchSel = { fg = c.orange, bold = true },
-  -- orthographe
+  -- spelling
   SpellBad = { sp = c.red, undercurl = true },
   SpellCap = { sp = c.yellow, undercurl = true },
   SpellLocal = { sp = c.teal, undercurl = true },
@@ -160,7 +160,7 @@ local groups = {
   diffFile = { fg = c.orange, bold = true },
   diffLine = { fg = c.type },
 
-  -- ---------------------------------------------------------------- syntaxe (legacy)
+  -- ---------------------------------------------------------------- syntax (legacy)
   Comment = { fg = c.comment, italic = true },
   Constant = { fg = c.number },
   String = { fg = c.string },
@@ -279,7 +279,7 @@ local groups = {
   ["@tag.attribute"] = { fg = c.attribute },
   ["@tag.delimiter"] = { fg = c.punct },
 
-  -- ---------------------------------------------------------------- LSP (jetons sémantiques)
+  -- ---------------------------------------------------------------- LSP (semantic tokens)
   ["@lsp.type.class"] = { link = "@type" },
   ["@lsp.type.enum"] = { link = "@type" },
   ["@lsp.type.enumMember"] = { link = "@constant" },
@@ -289,7 +289,7 @@ local groups = {
   ["@lsp.type.namespace"] = { link = "@module" },
   ["@lsp.type.parameter"] = { link = "@variable.parameter" },
   ["@lsp.type.property"] = { link = "@property" },
-  ["@lsp.type.variable"] = {}, -- laisser tree-sitter décider
+  ["@lsp.type.variable"] = {}, -- let tree-sitter decide
   ["@lsp.type.macro"] = { link = "@function.macro" },
   ["@lsp.type.method"] = { link = "@function.method" },
   ["@lsp.type.function"] = { link = "@function" },
@@ -322,7 +322,7 @@ local groups = {
   DiagnosticUnnecessary = { fg = c.faint },
   DiagnosticDeprecated = { strikethrough = true },
 
-  -- ---------------------------------------------------------------- plugins LazyVim
+  -- ---------------------------------------------------------------- LazyVim plugins
   -- gitsigns
   GitSignsAdd = { fg = c.teal },
   GitSignsChange = { fg = c.orange },
@@ -398,7 +398,7 @@ for group, opts in pairs(groups) do
   hl(group, opts)
 end
 
--- Terminal intégré : palette ANSI du thème
+-- Built-in terminal: the theme's ANSI palette
 for i = 0, 15 do
   vim.g["terminal_color_" .. i] = p["color" .. i]
 end

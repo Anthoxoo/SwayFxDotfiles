@@ -1,6 +1,5 @@
-# Everforest (sombre, contraste moyen) — palette de sainnhe/everforest
+# Everforest (dark, medium contrast) — palette from sainnhe/everforest
 name = "Everforest"
-mode = "dark"
 
 accent = "#a7c080"       # green
 background = "#2d353b"   # bg0
@@ -40,7 +39,6 @@ placeholder = "#7a8478"
 urgent = "#e67e80"
 warning = "#e69875"    # orange
 success = "#83c092"
-info = "#7fbbb3"
 
 [syntax]
 keyword = "#e67e80"

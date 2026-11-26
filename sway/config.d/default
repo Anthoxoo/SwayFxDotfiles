@@ -216,7 +216,7 @@ bindsym $mod+r mode "resize"
     bindsym $mod+Ctrl+Shift+space exec qs ipc call wallpaper prev
 
 #
-# Thème global (~/.config/themes) : sélecteur Quickshell
+# Global theme (~/.config/themes): Quickshell picker
 #
     bindsym $mod+Shift+t exec qs ipc call shell toggle theme
 

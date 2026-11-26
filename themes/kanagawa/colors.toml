@@ -1,6 +1,5 @@
-# Kanagawa (variante Wave) — palette de rebelot/kanagawa.nvim
+# Kanagawa (Wave variant) — palette from rebelot/kanagawa.nvim
 name = "Kanagawa"
-mode = "dark"
 
 accent = "#7e9cd8"       # crystalBlue
 background = "#1f1f28"   # sumiInk3
@@ -38,7 +37,6 @@ placeholder = "#54546d" # sumiInk6
 urgent = "#e82424"
 warning = "#ff9e3b"
 success = "#98bb6c"
-info = "#7fb4ca"
 
 [syntax]
 keyword = "#957fb8"    # oniViolet

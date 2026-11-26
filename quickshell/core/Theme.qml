@@ -3,9 +3,9 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// Couleurs du thème global (~/.config/themes) : `theme set <id>` réécrit
-// ~/.config/themes/current/palette.json, relu ici à chaud. Les valeurs par défaut
-// (Orange Black) servent tant que le fichier est absent ou illisible.
+// Global theme colors (~/.config/themes): `theme set <id>` rewrites
+// ~/.config/themes/current/palette.json, hot-reloaded here. The defaults
+// (Orange Black) apply while the file is missing or unreadable.
 //   qs ipc call theme set <id> | next | prev | get
 Singleton {
     id: root
@@ -15,7 +15,7 @@ Singleton {
 
     property var p: ({})
     property bool ready: false
-    // Émis quand l'utilisateur change de thème (pas au démarrage) — voir Wallpapers.qml
+    // Emitted when the user switches theme (not at startup) — see Wallpapers.qml
     signal switched()
 
     readonly property string themeId: p.id || "orange-black"
@@ -25,7 +25,7 @@ Singleton {
     // Surfaces
     readonly property color bgSolid: p.background || "#141416"
     readonly property color bg: alpha(bgSolid, p.panel_alpha ?? 0.95)
-    // Barre translucide : swayfx floute ce qu'il y a dessous (layer_effects "qs-bar")
+    // Translucent bar: swayfx blurs what's underneath (layer_effects "qs-bar")
     readonly property color barBg: alpha(bgSolid, p.bar_alpha ?? 0.72)
     readonly property color bgInset: p.inset || "#0e0e10"
     readonly property color bgCard: p.surface || "#18181b"
@@ -34,7 +34,7 @@ Singleton {
     readonly property color border: p.border || "#2a2a2c"
     readonly property color sep: p.separator || "#2e2e32"
 
-    // Texte
+    // Text
     readonly property color fg: p.foreground || "#e5e5e5"
     readonly property color subtle: p.subtle || "#b8b8bc"
     readonly property color win: p.dim || "#9a9a9e"
@@ -49,7 +49,7 @@ Singleton {
 
     readonly property string fontMain: "JetBrainsMono Nerd Font"
 
-    // --- Changement de thème -------------------------------------------------
+    // --- Theme switching ------------------------------------------------------
     property var available: []   // [{id, name, accent, background, foreground, surface, border, colors[]}]
     property bool busy: false
 
@@ -65,7 +65,7 @@ Singleton {
         id: setter
         onExited: (code, status) => {
             root.busy = false;
-            if (code !== 0) console.warn("theme: échec de `theme set` (code " + code + ")");
+            if (code !== 0) console.warn("theme: `theme set` failed (code " + code + ")");
         }
     }
 
@@ -78,7 +78,7 @@ Singleton {
                 try {
                     root.available = JSON.parse(text);
                 } catch (e) {
-                    console.warn("theme: liste illisible");
+                    console.warn("theme: unreadable theme list");
                 }
             }
         }
@@ -95,7 +95,7 @@ Singleton {
             try {
                 next = JSON.parse(text());
             } catch (e) {
-                return; // fichier en cours d'écriture ou invalide : on garde l'ancien
+                return; // file being written or invalid: keep the previous palette
             }
             let changed = root.ready && next.id !== root.p.id;
             root.p = next;
@@ -121,31 +121,31 @@ Singleton {
         set(ids[(i + delta + ids.length) % ids.length]);
     }
 
-    // Couleur avec opacité (0..1), pour les voiles et fonds translucides
+    // Color with opacity (0..1), for veils and translucent backgrounds
     function alpha(c, a) {
         return Qt.rgba(c.r, c.g, c.b, a);
     }
 
-    // --- Infobulles HTML (Text.RichText) : toutes les couleurs passent par le thème ---
+    // --- HTML tooltips (Text.RichText): every color goes through the theme ---
     function hex(c) {
         return c.toString();
     }
     function tipSpan(c, text) {
         return "<span style='color:" + hex(c) + ";'>" + text + "</span>";
     }
-    // Ligne de titre (accent)
+    // Title line (accent)
     function tipTitle(text) {
         return tipSpan(accent, text);
     }
-    // Ligne grisée (état inactif)
+    // Greyed-out line (inactive state)
     function tipMuted(text) {
         return tipSpan(muted, text);
     }
-    // Ligne "label   valeur" (label aligné sur `width` caractères)
+    // "label   value" line (label padded to `width` characters)
     function tipRow(label, value, width) {
         return tipSpan(muted, String(label).padEnd(width || 8, " ")) + tipSpan(fg, value);
     }
-    // Bloc monospace multi-lignes
+    // Multi-line monospace block
     function tipBlock(lines) {
         return "<tt>" + lines.join("<br>") + "</tt>";
     }

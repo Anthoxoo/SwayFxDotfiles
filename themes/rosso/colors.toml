@@ -1,6 +1,5 @@
-# Rosso — rouge et brun chaud, tiré de ~/.config/walls/red-ish (Porco Rosso)
+# Rosso — red and warm brown, taken from ~/.config/walls/red-ish (Porco Rosso)
 name = "Rosso"
-mode = "dark"
 
 accent = "#d9443e"
 background = "#1a1216"

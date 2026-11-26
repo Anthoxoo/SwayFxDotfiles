@@ -1,5 +1,5 @@
 [general]
-# Couleurs : thème global (~/.config/themes), rechargé à chaud
+# Colors: global theme (~/.config/themes), hot-reloaded
 import = ["~/.config/themes/current/alacritty.toml"]
 
 [env]

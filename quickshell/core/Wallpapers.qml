@@ -6,8 +6,8 @@ import Quickshell.Io
 // Fond d'écran dessiné par Quickshell (remplace swaybg) — voir modules/Wallpaper.qml
 //   qs ipc call wallpaper next | prev | set <chemin> | get
 // Le choix est mémorisé dans ~/.local/state/quickshell/wallpaper
-// next/prev parcourent les fonds du thème courant (Theme.backgrounds, sinon tout wallsDir) ;
-// changer de thème passe au premier fond du nouveau thème.
+// next/prev cycle through the current theme's wallpapers (Theme.backgrounds, else all of wallsDir);
+// switching theme jumps to the new theme's first wallpaper.
 Singleton {
     id: root
 

@@ -1,6 +1,6 @@
 return {
-  -- Thème "theme" (colors/theme.lua) : suit le thème global ~/.config/themes,
-  -- repli sur colors/orange-black.lua (portage du thème Zed du même nom).
+  -- "theme" colorscheme (colors/theme.lua): follows the global theme ~/.config/themes,
+  -- falls back to colors/orange-black.lua (port of the Zed theme of the same name).
   {
     "LazyVim/LazyVim",
     opts = {

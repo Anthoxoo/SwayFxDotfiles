@@ -1,6 +1,5 @@
-# Orange Black — thème d'origine (Quickshell, Zed, GTK, nvim)
+# Orange Black — the original theme (Quickshell, Zed, GTK, nvim)
 name = "Orange Black"
-mode = "dark"
 
 accent = "#ff8800"
 background = "#141416"
@@ -40,7 +39,7 @@ urgent = "#e05252"
 warning = "#ffaa33"
 success = "#5eaab5"
 
-# Couleurs du thème Zed ~/.config/zed/themes/orange-black.json
+# Colors from the Zed theme ~/.config/zed/themes/orange-black.json
 [syntax]
 editor_fg = "#b8b8bc"
 keyword = "#ff8800"

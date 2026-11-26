@@ -1,6 +1,5 @@
-# Monochrome — gris froids, d'après ~/.config/walls/black-white-ish/colors.toml
+# Monochrome — cool greys, based on ~/.config/walls/black-white-ish/colors.toml
 name = "Monochrome"
-mode = "dark"
 
 accent = "#a8adb0"
 background = "#101315"

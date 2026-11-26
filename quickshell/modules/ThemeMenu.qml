@@ -4,8 +4,8 @@ import QtQuick
 import QtQuick.Layouts
 import "../core"
 
-// Sélecteur de thème global (~/.config/themes) — $mod+Shift+t / `qs ipc call shell toggle theme`
-// ↑/↓ (ou j/k) pour choisir, Entrée pour appliquer, Échap pour fermer.
+// Global theme picker (~/.config/themes) — $mod+Shift+t / `qs ipc call shell toggle theme`
+// ↑/↓ (or j/k) to choose, Enter to apply, Escape to close.
 PanelWindow {
     id: themeWin
 
@@ -30,7 +30,7 @@ PanelWindow {
     function selectCurrent() {
         selectedIndex = Math.max(0, themes.findIndex(t => t.id === Theme.themeId));
     }
-    // La liste est relue à chaque ouverture (nouveaux thèmes) : resélectionner le thème actif
+    // The list is re-read on every opening (new themes): reselect the active theme
     onThemesChanged: if (visible) selectCurrent()
 
     onVisibleChanged: {
@@ -73,7 +73,7 @@ PanelWindow {
         }
     }
 
-    // Clic en dehors pour fermer
+    // Click outside to close
     MouseArea {
         anchors.fill: parent
         onPressed: SysState.themeMenuOpen = false
@@ -104,7 +104,7 @@ PanelWindow {
             Text {
                 Layout.fillWidth: true
                 Layout.bottomMargin: 6
-                text: "󰏘   thème" + (Theme.busy ? "  …" : "")
+                text: "󰏘   theme" + (Theme.busy ? "  …" : "")
                 font.family: Theme.fontMain
                 font.pixelSize: 15
                 color: Theme.accent
@@ -112,7 +112,7 @@ PanelWindow {
 
             Text {
                 visible: themeWin.themes.length === 0
-                text: "aucun thème dans ~/.config/themes"
+                text: "no theme in ~/.config/themes"
                 font.family: Theme.fontMain
                 font.pixelSize: 13
                 color: Theme.muted
@@ -138,7 +138,7 @@ PanelWindow {
                         color: Theme.accent
                     }
 
-                    // Aperçu : fond, accent puis rouge/vert/jaune/bleu/magenta/cyan du thème
+                    // Preview: background, accent, then the theme's red/green/yellow/blue/magenta/cyan
                     Rectangle {
                         id: preview
                         anchors.left: parent.left
@@ -207,7 +207,7 @@ PanelWindow {
             Text {
                 Layout.fillWidth: true
                 Layout.topMargin: 6
-                text: "↑↓ choisir · ⏎ appliquer · échap fermer"
+                text: "↑↓ choose · ⏎ apply · esc close"
                 font.family: Theme.fontMain
                 font.pixelSize: 11
                 color: Theme.placeholder

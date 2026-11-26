@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
-"""Gestionnaire de thèmes global (inspiré d'omarchy).
+"""Global theme manager (omarchy-style).
 
-Un thème = un dossier ~/.config/themes/<id>/ contenant :
-  colors.toml     palette (format omarchy : accent, background, foreground, color0..15
-                  + sections facultatives [ui], [syntax], [gtk])
-  backgrounds/    fonds d'écran du thème (souvent un lien vers ~/.config/walls/<dossier>)
-  <fichier>       facultatif : remplace le template du même nom (ex. alacritty.toml)
+A theme is a directory ~/.config/themes/<id>/ containing:
+  colors.toml     palette (omarchy format: accent, background, foreground, color0..15
+                  + optional [ui], [syntax] and [gtk] sections)
+  backgrounds/    the theme's wallpapers (usually a link to ~/.config/walls/<dir>)
+  <file>          optional: replaces the template of the same name (e.g. alacritty.toml)
 
-`theme set <id>` génère ~/.config/themes/current/ :
-  palette.json    toutes les couleurs résolues (lu par Quickshell et Neovim)
-  sway.conf, alacritty.toml, gtk-3.0.css, gtk-4.0.css, zed.json, btop.theme   rendus depuis templates/
-puis applique le thème aux applications déjà ouvertes.
+`theme set <id>` generates ~/.config/themes/current/:
+  palette.json    every resolved color (read by Quickshell and Neovim)
+  one file per template in templates/ (sway, alacritty, GTK, Zed, btop, fuzzel, Firefox)
+then applies the theme to running applications.
 
-Templates : {{ cle }} -> #rrggbb, {{ cle_strip }} -> rrggbb, {{ cle_rgb }} -> r, g, b
+Templates: {{ key }} -> #rrggbb, {{ key_strip }} -> rrggbb, {{ key_rgb }} -> r, g, b
 """
 
 import json
@@ -30,7 +30,7 @@ CURRENT = ROOT / "current"
 HEX_RE = re.compile(r"^#[0-9a-fA-F]{6}$")
 
 
-# ---------------------------------------------------------------- couleurs
+# ---------------------------------------------------------------- colors
 def rgb(h):
     return tuple(int(h[i:i + 2], 16) for i in (1, 3, 5))
 
@@ -40,13 +40,13 @@ def hexc(t):
 
 
 def mix(a, b, t):
-    """Mélange a vers b (t = part de b), comme une couleur b d'opacité t posée sur a."""
+    """Blend a towards b (t = share of b)."""
     ra, rb = rgb(a), rgb(b)
     return hexc(tuple(x + (y - x) * t for x, y in zip(ra, rb)))
 
 
 def over(fg, bg, alpha):
-    """fg avec une opacité alpha posée sur bg (couleurs pré-mélangées pour nvim/GTK)."""
+    """fg at opacity alpha painted over bg (pre-blended colors for nvim/GTK)."""
     return mix(bg, fg, alpha)
 
 
@@ -55,14 +55,14 @@ def load_theme(tid):
     d = ROOT / tid
     f = d / "colors.toml"
     if not f.is_file():
-        raise SystemExit(f"thème inconnu : {tid}")
+        raise SystemExit(f"unknown theme: {tid}")
     with f.open("rb") as fh:
         raw = tomllib.load(fh)
     return d, raw
 
 
 def resolve(tid, raw):
-    """Palette complète : valeurs du thème, sinon dérivées des couleurs de base."""
+    """Full palette: the theme's values, otherwise derived from the base colors."""
     ui = raw.get("ui", {})
     syn = raw.get("syntax", {})
     gtk = raw.get("gtk", {})
@@ -70,14 +70,13 @@ def resolve(tid, raw):
     def need(k):
         v = raw.get(k)
         if not isinstance(v, str) or not HEX_RE.match(v):
-            raise SystemExit(f"{tid}/colors.toml : '{k}' manquant ou invalide (#rrggbb attendu)")
+            raise SystemExit(f"{tid}/colors.toml: '{k}' missing or invalid (expected #rrggbb)")
         return v.lower()
 
-    p = {"id": tid, "name": raw.get("name", tid), "mode": raw.get("mode", "dark")}
+    p = {"id": tid, "name": raw.get("name", tid)}
     bg, fg, acc = need("background"), need("foreground"), need("accent")
     for i in range(16):
         p[f"color{i}"] = need(f"color{i}")
-    dark = p["mode"] != "light"
     p.update(background=bg, foreground=fg, accent=acc)
     p["cursor"] = raw.get("cursor", acc)
     p["selection_background"] = raw.get("selection_background", over(acc, bg, 0.24))
@@ -89,32 +88,30 @@ def resolve(tid, raw):
             v = v.lower()
         p[key] = v
 
-    # --- interface (Quickshell, GTK, sway) : surfaces du plus sombre au plus clair
-    put(ui, "inset", mix(bg, "#000000" if dark else "#ffffff", 0.3))
+    # --- interface (Quickshell, GTK, sway): surfaces from darkest to lightest
+    put(ui, "inset", mix(bg, "#000000", 0.3))
     put(ui, "surface", mix(bg, fg, 0.03))
     put(ui, "row_hover", mix(bg, fg, 0.045))
     put(ui, "hover", mix(bg, fg, 0.10))
     put(ui, "border", mix(bg, fg, 0.11))
     put(ui, "separator", mix(bg, fg, 0.13))
-    # texte, du plus lisible au plus effacé
+    # text, from most to least readable
     put(ui, "subtle", mix(fg, bg, 0.2))
     put(ui, "dim", mix(fg, bg, 0.35))
     put(ui, "muted", mix(fg, bg, 0.43))
     put(ui, "disabled", mix(fg, bg, 0.5))
     put(ui, "placeholder", mix(fg, bg, 0.56))
-    # états
-    put(ui, "field", p["row_hover"])  # champs de saisie, onglet actif (Firefox)
+    # states
+    put(ui, "field", p["row_hover"])  # input fields, active tab (Firefox)
     put(ui, "accent_fg", bg)
     put(ui, "urgent", p["color1"])
     put(ui, "warning", p["color3"])
     put(ui, "success", p["color6"])
-    put(ui, "info", p["color4"])
-    # opacités
+    # opacities (Quickshell)
     put(ui, "panel_alpha", 0.95)
     put(ui, "bar_alpha", 0.72)
-    put(ui, "terminal_opacity", 0.92)
 
-    # --- éditeur (Neovim ; Zed plus tard)
+    # --- editors (Neovim, Zed)
     put(syn, "editor_fg", fg)
     put(syn, "keyword", acc)
     put(syn, "function", p["color4"])
@@ -131,8 +128,8 @@ def resolve(tid, raw):
     put(syn, "comment", p["disabled"])
     put(syn, "line_nr", mix(fg, bg, 0.65))
     put(syn, "guide_active", p["color8"])
-    put(syn, "special", p["color11"])  # 2e couleur chaude (Zed : fichiers renommés, curseurs)
-    # fonds pré-mélangés (nvim n'a pas de canal alpha)
+    put(syn, "special", p["color11"])  # second warm color (Zed: renamed files, cursors)
+    # pre-blended backgrounds (nvim has no alpha channel)
     put(syn, "visual", over(acc, bg, 0.24))
     put(syn, "search", over(p["warning"], bg, 0.25))
     put(syn, "match_paren", over(acc, bg, 0.19))
@@ -143,21 +140,21 @@ def resolve(tid, raw):
     put(syn, "warning_bg", over(p["warning"], bg, 0.16))
     put(syn, "info_bg", over(p["success"], bg, 0.16))
     put(syn, "special_bg", over(p["special"], bg, 0.16))
-    # bordures des badges d'état (Zed)
+    # status badge borders (Zed)
     for k in ("accent", "urgent", "warning", "success", "special"):
         put(syn, k + "_border", over(p[k], bg, 0.4))
-    # variantes atténuées des couleurs ANSI 0-7 (terminal de Zed)
+    # dimmed variants of ANSI colors 0-7 (Zed terminal)
     for i in range(8):
         put(syn, f"dim{i}", over(p[f"color{i}"], bg, 0.7))
 
-    # --- GTK / icônes
-    put(gtk, "gtk_theme", "adw-gtk3-dark" if dark else "adw-gtk3")
-    put(gtk, "icon_theme", "Papirus-Dark" if dark else "Papirus-Light")
+    # --- GTK / icons (dark themes only)
+    put(gtk, "gtk_theme", "adw-gtk3-dark")
+    put(gtk, "icon_theme", "Papirus-Dark")
     put(gtk, "gnome_accent", "blue")
 
     for k, v in p.items():
         if isinstance(v, str) and v.startswith("#") and not HEX_RE.match(v):
-            raise SystemExit(f"{tid}/colors.toml : '{k}' = {v} invalide (#rrggbb attendu)")
+            raise SystemExit(f"{tid}/colors.toml: '{k}' = {v} is invalid (expected #rrggbb)")
     return p
 
 
@@ -178,7 +175,7 @@ def render(text, vars_, name):
     def sub(m):
         k = m.group(1)
         if k not in vars_:
-            raise SystemExit(f"template {name} : variable inconnue '{k}'")
+            raise SystemExit(f"template {name}: unknown variable '{k}'")
         return vars_[k]
     return TPL_RE.sub(sub, text)
 
@@ -189,7 +186,7 @@ def write_atomic(path, text):
     os.replace(tmp, path)
 
 
-# ---------------------------------------------------------------- commandes
+# ---------------------------------------------------------------- commands
 def themes():
     return sorted(d.name for d in ROOT.iterdir()
                   if d.is_dir() and (d / "colors.toml").is_file())
@@ -205,8 +202,8 @@ def current_id():
 def build(tid):
     d, raw = load_theme(tid)
     p = resolve(tid, raw)
-    # Chemin tel quel (lien suivi sur un niveau, sans resolve()) : il doit correspondre aux
-    # chemins ~/.config/walls/... que Quickshell a déjà mémorisés.
+    # Path as is (link followed one level, no resolve()): it must match the
+    # ~/.config/walls/... paths Quickshell has already saved.
     bgs = d / "backgrounds"
     if bgs.is_symlink():
         bgs = Path(os.path.normpath(bgs.parent / os.readlink(bgs)))
@@ -217,10 +214,10 @@ def build(tid):
     rendered = {}
     for tpl in sorted(TEMPLATES.iterdir()):
         if tpl.is_file():
-            own = d / tpl.name  # un thème peut fournir sa propre version d'un fichier
+            own = d / tpl.name  # a theme can ship its own version of a file
             src = own if own.is_file() else tpl
             rendered[tpl.name] = render(src.read_text(), vars_, src)
-    # tout est validé avant d'écrire : pas de thème à moitié appliqué
+    # everything is validated before writing: no half-applied theme
     for name, text in rendered.items():
         write_atomic(CURRENT / name, text)
     write_atomic(CURRENT / "palette.json", json.dumps(p, indent=2) + "\n")
@@ -228,18 +225,18 @@ def build(tid):
     return p
 
 
-# Fichiers recopiés là où l'application les attend (elle ne sait pas lire current/) :
-# Zed charge tout ~/.config/zed/themes/*.json et recharge à chaud ; settings.json
-# pointe une fois pour toutes sur le thème "Theme".
+# Files copied where the application expects them (it can't read current/):
+# Zed loads every ~/.config/zed/themes/*.json and hot-reloads; settings.json
+# points at the "Theme" theme once and for all.
 INSTALL = {
     "zed.json": Path.home() / ".config/zed/themes/theme.json",
-    # btop.conf : color_theme = "theme"
+    # btop.conf: color_theme = "theme"
     "btop.theme": Path.home() / ".config/btop/themes/theme.theme",
 }
 
 
-# Firefox : seulement les profils déjà préparés par firefox-setup.sh (dossier chrome/ présent).
-# userChrome.css n'est relu qu'au démarrage de Firefox.
+# Firefox: only profiles prepared by firefox-setup.sh (chrome/ directory present).
+# userChrome.css is only read when Firefox starts.
 FIREFOX = {
     "firefox-userChrome.css": "chrome/userChrome.css",
     "firefox-userContent.css": "chrome/userContent.css",
@@ -274,24 +271,24 @@ def quiet(cmd):
 
 
 def apply_live(p):
-    # sway : couleurs des fenêtres sans `swaymsg reload` (qui relancerait Quickshell)
+    # sway: window colors without `swaymsg reload` (which would restart Quickshell)
     if os.environ.get("SWAYSOCK"):
         lines = [l.strip() for l in (CURRENT / "sway.conf").read_text().splitlines()
                  if l.strip().startswith("client.")]
         if lines:
             quiet(["swaymsg", "; ".join(lines)])
-    # GTK : changer de thème force les applis GTK 3 ouvertes à relire gtk.css
+    # GTK: switching the GTK theme makes running GTK 3 apps re-read gtk.css
     gs = ["gsettings", "set", "org.gnome.desktop.interface"]
     quiet(gs + ["gtk-theme", "Adwaita"])
     quiet(gs + ["gtk-theme", p["gtk_theme"]])
-    quiet(gs + ["color-scheme", "prefer-light" if p["mode"] == "light" else "prefer-dark"])
+    quiet(gs + ["color-scheme", "prefer-dark"])
     quiet(gs + ["accent-color", p["gnome_accent"]])
     quiet(gs + ["icon-theme", p["icon_theme"]])
-    # Neovim : autocmd Signal SIGUSR1 -> recharge le colorscheme "theme"
+    # Neovim: autocmd Signal SIGUSR1 -> reload the "theme" colorscheme
     quiet(["pkill", "-USR1", "-x", "nvim"])
-    # btop : SIGUSR2 = relire btop.conf (et donc le thème)
+    # btop: SIGUSR2 = re-read btop.conf (and so the theme)
     quiet(["pkill", "-USR2", "-x", "btop"])
-    # Quickshell et alacritty surveillent leurs fichiers : rien à faire
+    # Quickshell and alacritty watch their files: nothing to do
 
 
 def cmd_list(as_json):
@@ -307,7 +304,7 @@ def cmd_list(as_json):
         except SystemExit as e:
             print(e, file=sys.stderr)
             continue
-        out.append({k: p[k] for k in ("id", "name", "mode", "background", "foreground",
+        out.append({k: p[k] for k in ("id", "name", "background", "foreground",
                                       "accent", "surface", "border")}
                    | {"colors": [p[f"color{i}"] for i in (1, 2, 3, 4, 5, 6)]})
     print(json.dumps(out))
@@ -322,7 +319,7 @@ def cmd_step(delta):
 
 def main(argv):
     if not argv or argv[0] in ("-h", "--help", "help"):
-        print("usage : theme list [--json] | current | set <id> | next | prev | apply")
+        print("usage: theme list [--json] | current | set <id> | next | prev | apply")
         return
     cmd, args = argv[0], argv[1:]
     if cmd == "list":
@@ -332,7 +329,7 @@ def main(argv):
     elif cmd in ("set", "next", "prev", "apply"):
         if cmd == "set":
             if not args:
-                raise SystemExit("usage : theme set <id>")
+                raise SystemExit("usage: theme set <id>")
             tid = args[0]
         elif cmd == "apply":
             tid = current_id() or "orange-black"
@@ -340,9 +337,9 @@ def main(argv):
             tid = cmd_step(1 if cmd == "next" else -1)
         p = build(tid)
         apply_live(p)
-        print(f"thème : {p['name']}")
+        print(f"theme: {p['name']}")
     else:
-        raise SystemExit(f"commande inconnue : {cmd}")
+        raise SystemExit(f"unknown command: {cmd}")
 
 
 if __name__ == "__main__":
