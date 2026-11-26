@@ -109,6 +109,17 @@ toolbar#PersonalToolbar,
     border-bottom: 1px solid var(--theme-border) !important;
 }
 
+/* Wider address bar: the flexible spaces around it (customizableui-special-spring1/2) no
+   longer take up to 112px each */
+#nav-bar toolbarspring:not(#vertical-spacer) {
+    max-width: 8px !important;
+}
+
+/* No "Extension (Theme Sync)" chip on the new tab page (an extension page) */
+#identity-box[pageproxystate="valid"].extensionPage #identity-icon-box {
+    display: none !important;
+}
+
 #urlbar-background,
 #searchbar {
     appearance: none !important;
