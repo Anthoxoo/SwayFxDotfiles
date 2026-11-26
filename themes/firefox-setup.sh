@@ -17,7 +17,7 @@ fi
 xpi=$(mktemp --suffix=.xpi)
 trap 'rm -f "$xpi"' EXIT
 rm -f "$xpi"
-(cd "$here/firefox/extension" && python3 -m zipfile -c "$xpi" manifest.json background.js)
+(cd "$here/firefox/extension" && python3 -m zipfile -c "$xpi" manifest.json background.js newtab.html newtab.js)
 
 for pref in "${prefs[@]}"; do
     profile=$(dirname "$pref")

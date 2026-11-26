@@ -4,5 +4,7 @@ user_pref("nglayout.debug.disable_xul_cache", true);
 user_pref("ui.systemUsesDarkTheme", 1);
 user_pref("browser.in-content.dark-mode", true);
 user_pref("browser.display.background_color", "{{ background }}");
+// Background of blank pages in dark mode (read at startup; new tabs use Theme Sync's live page)
+user_pref("browser.display.background_color.dark", "{{ background }}");
 // Theme Sync (~/.config/themes/firefox) is a local, unsigned extension: allowed on ESR only with this.
 user_pref("xpinstall.signatures.required", false);
