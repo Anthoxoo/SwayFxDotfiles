@@ -115,6 +115,8 @@ def main():
     secret = os.environ.get("AMO_JWT_SECRET") or getpass.getpass("AMO API secret (hidden): ").strip()
     if not issuer or not secret:
         fail("API key and secret are both needed")
+    if not issuer.startswith("user:"):  # AMO shows it as user:12345678:123
+        issuer = "user:" + issuer
     amo = Amo(issuer, secret)
 
     print("Uploading...")

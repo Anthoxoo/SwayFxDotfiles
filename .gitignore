@@ -7,3 +7,7 @@ themes/current/
 zed/themes/theme.json
 btop/themes/theme.theme
 .DS_Store
+# Credentials never go in the repo
+*creds*
+*credentials*
+*secret*
