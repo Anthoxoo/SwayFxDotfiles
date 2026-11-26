@@ -1,0 +1,114 @@
+/* ==========================================================================
+   GTK 3 — généré par ~/.config/themes/theme depuis templates/gtk-3.0.css
+   (thème de base : adw-gtk3, couleurs du thème courant). Ne pas éditer
+   ~/.config/themes/current/gtk-3.0.css : modifier ce template.
+   ========================================================================== */
+
+/* --- Accent ------------------------------------------------------------- */
+@define-color accent_color          {{ accent }};
+@define-color accent_bg_color       {{ accent }};
+@define-color accent_fg_color       {{ accent_fg }};
+
+/* --- États (rouge "urgent", or "warning", teal discret du thème Zed) ---- */
+@define-color destructive_color     {{ urgent }};
+@define-color destructive_bg_color  {{ urgent }};
+@define-color destructive_fg_color  {{ accent_fg }};
+@define-color error_color           {{ urgent }};
+@define-color error_bg_color        {{ urgent }};
+@define-color error_fg_color        {{ accent_fg }};
+@define-color warning_color         {{ warning }};
+@define-color warning_bg_color      {{ warning }};
+@define-color warning_fg_color      {{ accent_fg }};
+@define-color success_color         {{ success }};
+@define-color success_bg_color      {{ success }};
+@define-color success_fg_color      {{ accent_fg }};
+
+/* --- Surfaces ----------------------------------------------------------- */
+@define-color window_bg_color       {{ background }};
+@define-color window_fg_color       {{ foreground }};
+@define-color view_bg_color         {{ background }};
+@define-color view_fg_color         {{ foreground }};
+
+@define-color headerbar_bg_color            {{ background }};
+@define-color headerbar_fg_color            {{ foreground }};
+@define-color headerbar_border_color        {{ foreground }};
+@define-color headerbar_backdrop_color      {{ background }};
+@define-color headerbar_shade_color         {{ border }};
+@define-color headerbar_darker_shade_color  {{ border }};
+
+@define-color sidebar_bg_color              {{ surface }};
+@define-color sidebar_fg_color              {{ foreground }};
+@define-color sidebar_backdrop_color        {{ surface }};
+@define-color sidebar_border_color          {{ border }};
+@define-color sidebar_shade_color           rgba(0, 0, 0, 0.36);
+@define-color secondary_sidebar_bg_color        {{ surface }};
+@define-color secondary_sidebar_fg_color        {{ foreground }};
+@define-color secondary_sidebar_backdrop_color  {{ surface }};
+@define-color secondary_sidebar_border_color    {{ border }};
+@define-color secondary_sidebar_shade_color     rgba(0, 0, 0, 0.36);
+
+@define-color card_bg_color         {{ surface }};
+@define-color card_fg_color         {{ foreground }};
+@define-color card_shade_color      rgba(0, 0, 0, 0.5);
+@define-color dialog_bg_color       {{ surface }};
+@define-color dialog_fg_color       {{ foreground }};
+@define-color popover_bg_color      {{ surface }};
+@define-color popover_fg_color      {{ foreground }};
+@define-color popover_shade_color   rgba(0, 0, 0, 0.5);
+@define-color thumbnail_bg_color    {{ surface }};
+@define-color thumbnail_fg_color    {{ foreground }};
+@define-color shade_color           rgba(0, 0, 0, 0.5);
+@define-color scrollbar_outline_color rgba(0, 0, 0, 0.95);
+
+/* Anciens noms GTK 3 encore lus par certaines applis (LibreOffice, Thunar…) */
+@define-color theme_selected_bg_color     {{ accent }};
+@define-color theme_selected_fg_color     {{ accent_fg }};
+@define-color theme_unfocused_selected_bg_color {{ accent }};
+@define-color theme_unfocused_selected_fg_color {{ accent_fg }};
+@define-color link_color                  {{ accent }};
+@define-color borders                     {{ border }};
+@define-color unfocused_borders           {{ border }};
+
+/* ==========================================================================
+   Retouches : angles carrés (comme sway, corner_radius 0), liseré couleur d'accent
+   sur les menus, sélection de la barre latérale façon Quickshell.
+   ========================================================================== */
+window,
+.background,
+headerbar,
+.titlebar,
+decoration,
+popover.background,
+menu,
+.menu,
+.context-menu,
+.card,
+tooltip.background {
+    border-radius: 0;
+}
+
+popover.background,
+menu,
+.menu,
+.context-menu {
+    border: 1px solid {{ accent }};
+}
+
+tooltip.background {
+    background-color: {{ surface }};
+    color: {{ foreground }};
+    border: 1px solid {{ border }};
+}
+
+*:link,
+*:link:hover {
+    color: {{ accent }};
+}
+
+.navigation-sidebar row:selected,
+placessidebar row:selected {
+    background-color: rgba({{ accent_rgb }}, 0.18);
+    color: {{ accent }};
+    box-shadow: inset 3px 0 {{ accent }};
+    border-radius: 0;
+}

@@ -1,0 +1,299 @@
+#!/usr/bin/env python3
+"""Gestionnaire de thèmes global (inspiré d'omarchy).
+
+Un thème = un dossier ~/.config/themes/<id>/ contenant :
+  colors.toml     palette (format omarchy : accent, background, foreground, color0..15
+                  + sections facultatives [ui], [syntax], [gtk])
+  backgrounds/    fonds d'écran du thème (souvent un lien vers ~/.config/walls/<dossier>)
+  <fichier>       facultatif : remplace le template du même nom (ex. alacritty.toml)
+
+`theme set <id>` génère ~/.config/themes/current/ :
+  palette.json    toutes les couleurs résolues (lu par Quickshell et Neovim)
+  sway.conf, alacritty.toml, gtk-3.0.css, gtk-4.0.css   rendus depuis templates/
+puis applique le thème aux applications déjà ouvertes.
+
+Templates : {{ cle }} -> #rrggbb, {{ cle_strip }} -> rrggbb, {{ cle_rgb }} -> r, g, b
+"""
+
+import json
+import os
+import re
+import subprocess
+import sys
+import tomllib
+from pathlib import Path
+
+ROOT = Path(os.environ.get("THEMES_DIR", Path(__file__).resolve().parent))
+TEMPLATES = ROOT / "templates"
+CURRENT = ROOT / "current"
+
+HEX_RE = re.compile(r"^#[0-9a-fA-F]{6}$")
+
+
+# ---------------------------------------------------------------- couleurs
+def rgb(h):
+    return tuple(int(h[i:i + 2], 16) for i in (1, 3, 5))
+
+
+def hexc(t):
+    return "#" + "".join(f"{max(0, min(255, round(v))):02x}" for v in t)
+
+
+def mix(a, b, t):
+    """Mélange a vers b (t = part de b), comme une couleur b d'opacité t posée sur a."""
+    ra, rb = rgb(a), rgb(b)
+    return hexc(tuple(x + (y - x) * t for x, y in zip(ra, rb)))
+
+
+def over(fg, bg, alpha):
+    """fg avec une opacité alpha posée sur bg (couleurs pré-mélangées pour nvim/GTK)."""
+    return mix(bg, fg, alpha)
+
+
+# ---------------------------------------------------------------- palette
+def load_theme(tid):
+    d = ROOT / tid
+    f = d / "colors.toml"
+    if not f.is_file():
+        raise SystemExit(f"thème inconnu : {tid}")
+    with f.open("rb") as fh:
+        raw = tomllib.load(fh)
+    return d, raw
+
+
+def resolve(tid, raw):
+    """Palette complète : valeurs du thème, sinon dérivées des couleurs de base."""
+    ui = raw.get("ui", {})
+    syn = raw.get("syntax", {})
+    gtk = raw.get("gtk", {})
+
+    def need(k):
+        v = raw.get(k)
+        if not isinstance(v, str) or not HEX_RE.match(v):
+            raise SystemExit(f"{tid}/colors.toml : '{k}' manquant ou invalide (#rrggbb attendu)")
+        return v.lower()
+
+    p = {"id": tid, "name": raw.get("name", tid), "mode": raw.get("mode", "dark")}
+    bg, fg, acc = need("background"), need("foreground"), need("accent")
+    for i in range(16):
+        p[f"color{i}"] = need(f"color{i}")
+    dark = p["mode"] != "light"
+    p.update(background=bg, foreground=fg, accent=acc)
+    p["cursor"] = raw.get("cursor", acc)
+    p["selection_background"] = raw.get("selection_background", over(acc, bg, 0.24))
+    p["selection_foreground"] = raw.get("selection_foreground", fg)
+
+    def put(section, key, default):
+        v = section.get(key, default)
+        if isinstance(v, str) and v.startswith("#"):
+            v = v.lower()
+        p[key] = v
+
+    # --- interface (Quickshell, GTK, sway) : surfaces du plus sombre au plus clair
+    put(ui, "inset", mix(bg, "#000000" if dark else "#ffffff", 0.3))
+    put(ui, "surface", mix(bg, fg, 0.03))
+    put(ui, "row_hover", mix(bg, fg, 0.045))
+    put(ui, "hover", mix(bg, fg, 0.10))
+    put(ui, "border", mix(bg, fg, 0.11))
+    put(ui, "separator", mix(bg, fg, 0.13))
+    # texte, du plus lisible au plus effacé
+    put(ui, "subtle", mix(fg, bg, 0.2))
+    put(ui, "dim", mix(fg, bg, 0.35))
+    put(ui, "muted", mix(fg, bg, 0.43))
+    put(ui, "disabled", mix(fg, bg, 0.5))
+    put(ui, "placeholder", mix(fg, bg, 0.56))
+    # états
+    put(ui, "accent_fg", bg)
+    put(ui, "urgent", p["color1"])
+    put(ui, "warning", p["color3"])
+    put(ui, "success", p["color6"])
+    put(ui, "info", p["color4"])
+    # opacités
+    put(ui, "panel_alpha", 0.95)
+    put(ui, "bar_alpha", 0.72)
+    put(ui, "terminal_opacity", 0.92)
+
+    # --- éditeur (Neovim ; Zed plus tard)
+    put(syn, "editor_fg", fg)
+    put(syn, "keyword", acc)
+    put(syn, "function", p["color4"])
+    put(syn, "type", p["color3"])
+    put(syn, "string", p["color2"])
+    put(syn, "number", p["color5"])
+    put(syn, "regex", p["color6"])
+    put(syn, "escape", p["color11"])
+    put(syn, "attribute", p["color3"])
+    put(syn, "variable", fg)
+    put(syn, "operator", p["color6"])
+    put(syn, "punctuation", p["placeholder"])
+    put(syn, "bracket", p["dim"])
+    put(syn, "comment", p["disabled"])
+    put(syn, "line_nr", mix(fg, bg, 0.65))
+    put(syn, "guide_active", p["color8"])
+    # fonds pré-mélangés (nvim n'a pas de canal alpha)
+    put(syn, "visual", over(acc, bg, 0.24))
+    put(syn, "search", over(p["warning"], bg, 0.25))
+    put(syn, "match_paren", over(acc, bg, 0.19))
+    put(syn, "diff_add", over(p["success"], bg, 0.16))
+    put(syn, "diff_delete", over(p["urgent"], bg, 0.16))
+    put(syn, "diff_change", over(acc, bg, 0.16))
+    put(syn, "diff_text", over(acc, bg, 0.30))
+    put(syn, "warning_bg", over(p["warning"], bg, 0.16))
+    put(syn, "info_bg", over(p["success"], bg, 0.16))
+
+    # --- GTK / icônes
+    put(gtk, "gtk_theme", "adw-gtk3-dark" if dark else "adw-gtk3")
+    put(gtk, "icon_theme", "Papirus-Dark" if dark else "Papirus-Light")
+    put(gtk, "gnome_accent", "blue")
+
+    for k, v in p.items():
+        if isinstance(v, str) and v.startswith("#") and not HEX_RE.match(v):
+            raise SystemExit(f"{tid}/colors.toml : '{k}' = {v} invalide (#rrggbb attendu)")
+    return p
+
+
+def template_vars(p):
+    out = {}
+    for k, v in p.items():
+        out[k] = str(v)
+        if isinstance(v, str) and HEX_RE.match(v):
+            out[k + "_strip"] = v[1:]
+            out[k + "_rgb"] = ", ".join(str(c) for c in rgb(v))
+    return out
+
+
+TPL_RE = re.compile(r"\{\{\s*([a-z0-9_]+)\s*\}\}")
+
+
+def render(text, vars_, name):
+    def sub(m):
+        k = m.group(1)
+        if k not in vars_:
+            raise SystemExit(f"template {name} : variable inconnue '{k}'")
+        return vars_[k]
+    return TPL_RE.sub(sub, text)
+
+
+def write_atomic(path, text):
+    tmp = path.with_name("." + path.name + ".tmp")
+    tmp.write_text(text)
+    os.replace(tmp, path)
+
+
+# ---------------------------------------------------------------- commandes
+def themes():
+    return sorted(d.name for d in ROOT.iterdir()
+                  if d.is_dir() and (d / "colors.toml").is_file())
+
+
+def current_id():
+    try:
+        return json.loads((CURRENT / "palette.json").read_text())["id"]
+    except (OSError, ValueError, KeyError):
+        return None
+
+
+def build(tid):
+    d, raw = load_theme(tid)
+    p = resolve(tid, raw)
+    # Chemin tel quel (lien suivi sur un niveau, sans resolve()) : il doit correspondre aux
+    # chemins ~/.config/walls/... que Quickshell a déjà mémorisés.
+    bgs = d / "backgrounds"
+    if bgs.is_symlink():
+        bgs = Path(os.path.normpath(bgs.parent / os.readlink(bgs)))
+    p["backgrounds"] = str(bgs) if bgs.is_dir() else ""
+    vars_ = template_vars(p)
+
+    CURRENT.mkdir(exist_ok=True)
+    rendered = {}
+    for tpl in sorted(TEMPLATES.iterdir()):
+        if tpl.is_file():
+            own = d / tpl.name  # un thème peut fournir sa propre version d'un fichier
+            src = own if own.is_file() else tpl
+            rendered[tpl.name] = render(src.read_text(), vars_, src)
+    # tout est validé avant d'écrire : pas de thème à moitié appliqué
+    for name, text in rendered.items():
+        write_atomic(CURRENT / name, text)
+    write_atomic(CURRENT / "palette.json", json.dumps(p, indent=2) + "\n")
+    return p
+
+
+def quiet(cmd):
+    try:
+        subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=5)
+    except (OSError, subprocess.TimeoutExpired):
+        pass
+
+
+def apply_live(p):
+    # sway : couleurs des fenêtres sans `swaymsg reload` (qui relancerait Quickshell)
+    if os.environ.get("SWAYSOCK"):
+        lines = [l.strip() for l in (CURRENT / "sway.conf").read_text().splitlines()
+                 if l.strip().startswith("client.")]
+        if lines:
+            quiet(["swaymsg", "; ".join(lines)])
+    # GTK : changer de thème force les applis GTK 3 ouvertes à relire gtk.css
+    gs = ["gsettings", "set", "org.gnome.desktop.interface"]
+    quiet(gs + ["gtk-theme", "Adwaita"])
+    quiet(gs + ["gtk-theme", p["gtk_theme"]])
+    quiet(gs + ["color-scheme", "prefer-light" if p["mode"] == "light" else "prefer-dark"])
+    quiet(gs + ["accent-color", p["gnome_accent"]])
+    quiet(gs + ["icon-theme", p["icon_theme"]])
+    # Neovim : autocmd Signal SIGUSR1 -> recharge le colorscheme "theme"
+    quiet(["pkill", "-USR1", "-x", "nvim"])
+    # Quickshell et alacritty surveillent leurs fichiers : rien à faire
+
+
+def cmd_list(as_json):
+    if not as_json:
+        cur = current_id()
+        for t in themes():
+            print(("* " if t == cur else "  ") + t)
+        return
+    out = []
+    for t in themes():
+        try:
+            p = resolve(t, load_theme(t)[1])
+        except SystemExit as e:
+            print(e, file=sys.stderr)
+            continue
+        out.append({k: p[k] for k in ("id", "name", "mode", "background", "foreground",
+                                      "accent", "surface", "border")}
+                   | {"colors": [p[f"color{i}"] for i in (1, 2, 3, 4, 5, 6)]})
+    print(json.dumps(out))
+
+
+def cmd_step(delta):
+    ts = themes()
+    cur = current_id()
+    i = ts.index(cur) if cur in ts else -1
+    return ts[(i + delta) % len(ts)]
+
+
+def main(argv):
+    if not argv or argv[0] in ("-h", "--help", "help"):
+        print("usage : theme list [--json] | current | set <id> | next | prev | apply")
+        return
+    cmd, args = argv[0], argv[1:]
+    if cmd == "list":
+        cmd_list("--json" in args)
+    elif cmd == "current":
+        print(current_id() or "")
+    elif cmd in ("set", "next", "prev", "apply"):
+        if cmd == "set":
+            if not args:
+                raise SystemExit("usage : theme set <id>")
+            tid = args[0]
+        elif cmd == "apply":
+            tid = current_id() or "orange-black"
+        else:
+            tid = cmd_step(1 if cmd == "next" else -1)
+        p = build(tid)
+        apply_live(p)
+        print(f"thème : {p['name']}")
+    else:
+        raise SystemExit(f"commande inconnue : {cmd}")
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

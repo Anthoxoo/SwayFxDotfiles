@@ -3,3 +3,4 @@ quickshell/ical.conf
 __pycache__/
 quickshell/google-oauth-client.json
 *.bak
+themes/current/

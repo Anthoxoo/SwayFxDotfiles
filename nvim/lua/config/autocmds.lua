@@ -6,3 +6,15 @@
 --
 -- Or remove existing autocmds by their group name (which is prefixed with `lazyvim_` for the defaults)
 -- e.g. vim.api.nvim_del_augroup_by_name("lazyvim_wrap_spell")
+
+-- Thème global (~/.config/themes) : `theme set <id>` envoie SIGUSR1 à chaque nvim ouvert
+vim.api.nvim_create_autocmd("Signal", {
+  pattern = "SIGUSR1",
+  callback = function()
+    vim.schedule(function()
+      if vim.g.colors_name == "theme" then
+        vim.cmd.colorscheme("theme")
+      end
+    end)
+  end,
+})

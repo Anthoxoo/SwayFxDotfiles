@@ -24,6 +24,7 @@ ShellRoot {
     AudioMenu {}
     BatteryMenu {}
     PowerMenu {}
+    ThemeMenu {}
     BrightnessOsd {}
     AudioOsd {}
     Notifications {}

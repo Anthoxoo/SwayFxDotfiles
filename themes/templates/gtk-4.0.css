@@ -1,0 +1,124 @@
+/* ==========================================================================
+   GTK 4 / libadwaita — généré par ~/.config/themes/theme depuis
+   templates/gtk-4.0.css. libadwaita ≥ 1.6 lit des variables CSS (--xxx) ;
+   les @define-color restent pour les applis GTK 4 sans libadwaita.
+   ========================================================================== */
+
+:root {
+    /* Accent */
+    --accent-color:        {{ accent }};
+    --accent-bg-color:     {{ accent }};
+    --accent-fg-color:     {{ accent_fg }};
+
+    /* États */
+    --destructive-color:    {{ urgent }};
+    --destructive-bg-color: {{ urgent }};
+    --destructive-fg-color: {{ accent_fg }};
+    --error-color:          {{ urgent }};
+    --error-bg-color:       {{ urgent }};
+    --error-fg-color:       {{ accent_fg }};
+    --warning-color:        {{ warning }};
+    --warning-bg-color:     {{ warning }};
+    --warning-fg-color:     {{ accent_fg }};
+    --success-color:        {{ success }};
+    --success-bg-color:     {{ success }};
+    --success-fg-color:     {{ accent_fg }};
+
+    /* Surfaces */
+    --window-bg-color:      {{ background }};
+    --window-fg-color:      {{ foreground }};
+    --view-bg-color:        {{ background }};
+    --view-fg-color:        {{ foreground }};
+
+    --headerbar-bg-color:           {{ background }};
+    --headerbar-fg-color:           {{ foreground }};
+    --headerbar-border-color:       {{ foreground }};
+    --headerbar-backdrop-color:     {{ background }};
+    --headerbar-shade-color:        {{ border }};
+    --headerbar-darker-shade-color: {{ border }};
+
+    --sidebar-bg-color:             {{ surface }};
+    --sidebar-fg-color:             {{ foreground }};
+    --sidebar-backdrop-color:       {{ surface }};
+    --sidebar-border-color:         {{ border }};
+    --sidebar-shade-color:          rgb(0 0 0 / 36%);
+    --secondary-sidebar-bg-color:       {{ surface }};
+    --secondary-sidebar-fg-color:       {{ foreground }};
+    --secondary-sidebar-backdrop-color: {{ surface }};
+    --secondary-sidebar-border-color:   {{ border }};
+    --secondary-sidebar-shade-color:    rgb(0 0 0 / 36%);
+
+    --card-bg-color:        {{ surface }};
+    --card-fg-color:        {{ foreground }};
+    --card-shade-color:     rgb(0 0 0 / 50%);
+    --dialog-bg-color:      {{ surface }};
+    --dialog-fg-color:      {{ foreground }};
+    --popover-bg-color:     {{ surface }};
+    --popover-fg-color:     {{ foreground }};
+    --popover-shade-color:  rgb(0 0 0 / 50%);
+    --thumbnail-bg-color:   {{ surface }};
+    --thumbnail-fg-color:   {{ foreground }};
+    --overview-bg-color:    {{ inset }};
+    --overview-fg-color:    {{ foreground }};
+    --active-toggle-bg-color: {{ border }};
+    --active-toggle-fg-color: {{ foreground }};
+    --shade-color:          rgb(0 0 0 / 50%);
+    --scrollbar-outline-color: rgb(0 0 0 / 95%);
+}
+
+/* Mêmes valeurs en couleurs nommées (GTK 4 sans libadwaita) */
+@define-color accent_color          {{ accent }};
+@define-color accent_bg_color       {{ accent }};
+@define-color accent_fg_color       {{ accent_fg }};
+@define-color destructive_color     {{ urgent }};
+@define-color destructive_bg_color  {{ urgent }};
+@define-color destructive_fg_color  {{ accent_fg }};
+@define-color error_color           {{ urgent }};
+@define-color warning_color         {{ warning }};
+@define-color success_color         {{ success }};
+@define-color window_bg_color       {{ background }};
+@define-color window_fg_color       {{ foreground }};
+@define-color view_bg_color         {{ background }};
+@define-color view_fg_color         {{ foreground }};
+@define-color headerbar_bg_color    {{ background }};
+@define-color headerbar_fg_color    {{ foreground }};
+@define-color sidebar_bg_color      {{ surface }};
+@define-color sidebar_fg_color      {{ foreground }};
+@define-color card_bg_color         {{ surface }};
+@define-color card_fg_color         {{ foreground }};
+@define-color dialog_bg_color       {{ surface }};
+@define-color dialog_fg_color       {{ foreground }};
+@define-color popover_bg_color      {{ surface }};
+@define-color popover_fg_color      {{ foreground }};
+@define-color borders               {{ border }};
+
+/* ==========================================================================
+   Retouches : angles carrés (comme sway, corner_radius 0), liseré couleur d'accent
+   sur les menus, sélection de la barre latérale façon Quickshell.
+   ========================================================================== */
+window,
+.background,
+headerbar,
+popover > contents,
+popover > arrow,
+.card,
+tooltip {
+    border-radius: 0;
+}
+
+popover > contents {
+    border: 1px solid {{ accent }};
+}
+
+tooltip {
+    background-color: {{ surface }};
+    color: {{ foreground }};
+    border: 1px solid {{ border }};
+}
+
+.navigation-sidebar row:selected {
+    background-color: rgba({{ accent_rgb }}, 0.18);
+    color: {{ accent }};
+    box-shadow: inset 3px 0 {{ accent }};
+    border-radius: 0;
+}

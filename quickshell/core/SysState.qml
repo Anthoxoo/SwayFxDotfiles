@@ -76,6 +76,7 @@ Singleton {
     property bool powerMenuOpen: false
     property bool launcherOpen: false
     property bool reminderOpen: false
+    property bool themeMenuOpen: false
     property bool dndMode: false
     property bool screenLocked: false
     property bool lockSecure: false          // vrai quand sway confirme le verrou (ext-session-lock)
@@ -108,7 +109,7 @@ Singleton {
             launcher: "launcherOpen", power: "powerMenuOpen", brightness: "brightnessMenuOpen",
             pods: "podsMenuOpen", wifi: "wifiMenuOpen", bt: "btMenuOpen", audio: "audioMenuOpen",
             battery: "batteryMenuOpen", monitors: "monitorsMenuOpen", calendar: "calendarMenuOpen",
-            reminder: "reminderOpen"
+            reminder: "reminderOpen", theme: "themeMenuOpen"
         })[name];
         if (!prop) return false;
         let next = !root[prop];
@@ -1112,6 +1113,7 @@ Singleton {
         root.wifiMenuOpen = false;
         root.btMenuOpen = false;
         root.reminderOpen = false;
+        root.themeMenuOpen = false;
     }
 
     function launchApp(appId, execCmd, isTerm) {

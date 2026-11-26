@@ -1,0 +1,51 @@
+# Monochrome — gris froids, d'après ~/.config/walls/black-white-ish/colors.toml
+name = "Monochrome"
+mode = "dark"
+
+accent = "#a8adb0"
+background = "#101315"
+foreground = "#cacccc"
+
+color0 = "#0c0e10"
+color1 = "#de6145"
+color2 = "#9fa5a9"
+color3 = "#d9dbdc"
+color4 = "#798186"
+color5 = "#aeaeae"
+color6 = "#707070"
+color7 = "#cacccc"
+color8 = "#4b4e55"
+color9 = "#de6145"
+color10 = "#c9c2b4"
+color11 = "#d9dbdc"
+color12 = "#a5aeb4"
+color13 = "#9a9a9a"
+color14 = "#8a8a8a"
+color15 = "#ffffff"
+
+selection_background = "#343d41"
+
+[ui]
+inset = "#0c0e10"
+surface = "#14181a"
+urgent = "#de6145"
+warning = "#c9c2b4"
+success = "#a5aeb4"
+
+[syntax]
+keyword = "#d9dbdc"
+function = "#a5aeb4"
+type = "#c9c2b4"
+string = "#9fa5a9"
+number = "#cbc2be"
+regex = "#aeaeae"
+escape = "#de6145"
+attribute = "#a8adb0"
+variable = "#cacccc"
+operator = "#798186"
+comment = "#5d6367"
+visual = "#343d41"
+
+[gtk]
+icon_theme = "Papirus-Dark"
+gnome_accent = "slate"

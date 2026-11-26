@@ -6,6 +6,8 @@ import Quickshell.Io
 // Fond d'écran dessiné par Quickshell (remplace swaybg) — voir modules/Wallpaper.qml
 //   qs ipc call wallpaper next | prev | set <chemin> | get
 // Le choix est mémorisé dans ~/.local/state/quickshell/wallpaper
+// next/prev parcourent les fonds du thème courant (Theme.backgrounds, sinon tout wallsDir) ;
+// changer de thème passe au premier fond du nouveau thème.
 Singleton {
     id: root
 
@@ -13,9 +15,27 @@ Singleton {
     readonly property string wallsDir: home + "/.config/walls"
     readonly property string stateDir: (Quickshell.env("XDG_STATE_HOME") || (home + "/.local/state")) + "/quickshell"
     readonly property string defaultWall: wallsDir + "/yellow-orange-ish/wall_secondary.png"
+    readonly property string dir: Theme.backgrounds !== "" ? Theme.backgrounds : wallsDir
 
     property string current: ""
     property var list: []
+    property bool relistPending: false
+    property bool themeSwitchPending: false
+
+    function relist() {
+        if (lister.running) root.relistPending = true;
+        else lister.running = true;
+    }
+
+    onDirChanged: relist()
+
+    Connections {
+        target: Theme
+        function onSwitched() {
+            root.themeSwitchPending = true;
+            root.relist();
+        }
+    }
 
     // URL file:// sûre (espaces, #, ? dans les noms de fichiers)
     function toUrl(path) {
@@ -44,9 +64,22 @@ Singleton {
     Process {
         id: lister
         running: true
-        command: ["sh", "-c", "find -L \"$1\" -maxdepth 2 -type f \\( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \\) | sort", "sh", root.wallsDir]
+        command: ["sh", "-c", "find -L \"$1\" -maxdepth 2 -type f \\( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \\) | sort", "sh", root.dir]
         stdout: StdioCollector {
-            onStreamFinished: root.list = text.split("\n").filter(l => l.trim() !== "")
+            onStreamFinished: {
+                root.list = text.split("\n").filter(l => l.trim() !== "");
+                if (root.themeSwitchPending && !root.relistPending) {
+                    root.themeSwitchPending = false;
+                    if (root.list.length > 0 && root.list.indexOf(root.current) < 0)
+                        root.set(root.list[0]);
+                }
+            }
+        }
+        onExited: {
+            if (root.relistPending) {
+                root.relistPending = false;
+                running = true;
+            }
         }
     }
 
@@ -71,8 +104,8 @@ Singleton {
     IpcHandler {
         target: "wallpaper"
 
-        function next(): void { lister.running = true; root.next(); }
-        function prev(): void { lister.running = true; root.prev(); }
+        function next(): void { root.relist(); root.next(); }
+        function prev(): void { root.relist(); root.prev(); }
         function set(path: string): void { root.set(path); }
         function get(): string { return root.current; }
     }

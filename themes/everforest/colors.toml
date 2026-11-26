@@ -1,0 +1,68 @@
+# Everforest (sombre, contraste moyen) — palette de sainnhe/everforest
+name = "Everforest"
+mode = "dark"
+
+accent = "#a7c080"       # green
+background = "#2d353b"   # bg0
+foreground = "#d3c6aa"   # fg
+
+color0 = "#343f44"
+color1 = "#e67e80"
+color2 = "#a7c080"
+color3 = "#dbbc7f"
+color4 = "#7fbbb3"
+color5 = "#d699b6"
+color6 = "#83c092"
+color7 = "#d3c6aa"
+color8 = "#5c6a72"
+color9 = "#e67e80"
+color10 = "#a7c080"
+color11 = "#dbbc7f"
+color12 = "#7fbbb3"
+color13 = "#d699b6"
+color14 = "#83c092"
+color15 = "#d3c6aa"
+
+selection_background = "#543a48"  # bg_visual
+
+[ui]
+inset = "#232a2e"      # bg_dim
+surface = "#343f44"    # bg1
+row_hover = "#343f44"
+hover = "#3d484d"      # bg2
+border = "#475258"     # bg3
+separator = "#4f585e"  # bg4
+subtle = "#9da9a0"     # grey2
+dim = "#9da9a0"
+muted = "#859289"      # grey1
+disabled = "#7a8478"   # grey0
+placeholder = "#7a8478"
+urgent = "#e67e80"
+warning = "#e69875"    # orange
+success = "#83c092"
+info = "#7fbbb3"
+
+[syntax]
+keyword = "#e67e80"
+function = "#a7c080"
+type = "#dbbc7f"
+string = "#83c092"
+number = "#d699b6"
+regex = "#e69875"
+escape = "#e69875"
+attribute = "#dbbc7f"
+variable = "#d3c6aa"
+operator = "#e69875"
+punctuation = "#859289"
+bracket = "#9da9a0"
+comment = "#859289"
+line_nr = "#7a8478"
+visual = "#543a48"
+diff_add = "#425047"   # bg_green
+diff_delete = "#514045" # bg_red
+diff_change = "#3a515d" # bg_blue
+warning_bg = "#4d4c43" # bg_yellow
+
+[gtk]
+icon_theme = "Papirus-Dark"
+gnome_accent = "green"
