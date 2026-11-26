@@ -38,6 +38,9 @@ placeholder = "#6e6e70"
 urgent = "#e05252"
 warning = "#ffaa33"
 success = "#5eaab5"
+ls_link = "#7aa2c8"
+ls_exec = "#a3be8c"
+ls_archive = "#cc7878"
 
 # Colors from the Zed theme ~/.config/zed/themes/orange-black.json
 [syntax]

@@ -1,8 +1,8 @@
 # Themes
 
 Global theme system, omarchy-style: one command recolors the whole desktop at once
-(Quickshell, sway windows, GTK 3/4, icons, alacritty, Neovim, Zed, btop, fuzzel, Firefox,
-wallpaper). Dark themes only.
+(Quickshell, sway windows, GTK 3/4, icons, alacritty, zsh prompt and `ls` colors, Neovim, Zed,
+btop, fuzzel, Firefox, wallpaper). Dark themes only.
 
 ```sh
 ~/.config/themes/theme list           # * = current theme
@@ -20,6 +20,7 @@ or `qs ipc call theme set <id>` / `next` / `prev`.
 themes/
 ├── theme                 the script (Python 3.11+, no dependencies)
 ├── firefox-setup.sh      prepares Firefox profiles once
+├── zsh/theme.zsh-theme   oh-my-zsh theme reading current/zsh.zsh
 ├── templates/            one file per application, rendered into current/
 ├── <id>/colors.toml      the theme's palette
 ├── <id>/backgrounds      wallpapers (link to ../../walls/<dir>)
@@ -36,6 +37,7 @@ running applications:
 | sway        | `current/sway.conf` (included by `sway/config.d/theme`) | `swaymsg client.*` (no reload, which would restart Quickshell) |
 | GTK 3 / 4   | `current/gtk-3.0.css`, `gtk-4.0.css` (imported by `~/.config/gtk-*/gtk.css`) | gsettings: GTK theme, color-scheme, accent, icons |
 | alacritty   | `current/alacritty.toml` (`general.import`) | alacritty hot reload                  |
+| zsh         | `current/zsh.zsh` (prompt colors, `LS_COLORS`), sourced by `zsh/theme.zsh-theme` | re-read at the next prompt |
 | Neovim      | `current/palette.json` (`colors/theme.lua`) | SIGUSR1 → `:colorscheme theme`        |
 | Zed         | `~/.config/zed/themes/theme.json` (copy of `current/zed.json`), theme "Theme" in settings.json | Zed watches its themes directory |
 | btop        | `~/.config/btop/themes/theme.theme`, `color_theme = "theme"` | SIGUSR2 (re-reads btop.conf)          |
@@ -55,7 +57,8 @@ A theme can also replace a whole template by shipping a file of the same name
 (e.g. `<id>/alacritty.toml`). Orange Black does this for Zed: `orange-black/zed.json` is the
 original Zed theme, unchanged.
 
-In templates: `{{ key }}` → `#rrggbb`, `{{ key_strip }}` → `rrggbb`, `{{ key_rgb }}` → `r, g, b`.
+In templates: `{{ key }}` → `#rrggbb`, `{{ key_strip }}` → `rrggbb`, `{{ key_rgb }}` → `r, g, b`,
+`{{ key_ansi }}` → `r;g;b`.
 An unknown key aborts the render before anything is written.
 
 ## Included themes
@@ -77,7 +80,12 @@ The Violet wallpapers are recolored with `walls/violet/recolor.sh` (same idea as
 
 `current/` isn't versioned: run `~/.config/themes/theme set orange-black` once. Without it,
 Quickshell and Neovim fall back to Orange Black, but sway, GTK and alacritty have no colors.
-For Firefox, also run `~/.config/themes/firefox-setup.sh`.
+For Firefox, also run `~/.config/themes/firefox-setup.sh`. For zsh:
+
+```sh
+ln -s ~/.config/themes/zsh/theme.zsh-theme ~/.oh-my-zsh/custom/themes/theme.zsh-theme
+# then in ~/.zshrc: ZSH_THEME="theme", and no LS_COLORS of its own
+```
 
 ## Cost
 

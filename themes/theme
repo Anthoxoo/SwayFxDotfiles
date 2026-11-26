@@ -9,10 +9,11 @@ A theme is a directory ~/.config/themes/<id>/ containing:
 
 `theme set <id>` generates ~/.config/themes/current/:
   palette.json    every resolved color (read by Quickshell and Neovim)
-  one file per template in templates/ (sway, alacritty, GTK, Zed, btop, fuzzel, Firefox)
+  one file per template in templates/ (sway, alacritty, GTK, Zed, btop, fuzzel, Firefox, zsh)
 then applies the theme to running applications.
 
-Templates: {{ key }} -> #rrggbb, {{ key_strip }} -> rrggbb, {{ key_rgb }} -> r, g, b
+Templates: {{ key }} -> #rrggbb, {{ key_strip }} -> rrggbb, {{ key_rgb }} -> r, g, b,
+{{ key_ansi }} -> r;g;b (truecolor escape codes)
 """
 
 import json
@@ -107,6 +108,10 @@ def resolve(tid, raw):
     put(ui, "urgent", p["color1"])
     put(ui, "warning", p["color3"])
     put(ui, "success", p["color6"])
+    # ls colors (LS_COLORS in zsh)
+    put(ui, "ls_link", p["color4"])
+    put(ui, "ls_exec", p["color2"])
+    put(ui, "ls_archive", p["color1"])
     # opacities (Quickshell)
     put(ui, "panel_alpha", 0.95)
     put(ui, "bar_alpha", 0.72)
@@ -165,6 +170,7 @@ def template_vars(p):
         if isinstance(v, str) and HEX_RE.match(v):
             out[k + "_strip"] = v[1:]
             out[k + "_rgb"] = ", ".join(str(c) for c in rgb(v))
+            out[k + "_ansi"] = ";".join(str(c) for c in rgb(v))
     return out
 
 
