@@ -1,0 +1,11 @@
+{
+  "manifest_version": 2,
+  "name": "Theme Sync",
+  "version": "1.0",
+  "description": "Applies the global desktop theme (~/.config/themes) live, through the theme API.",
+  "browser_specific_settings": {
+    "gecko": { "id": "theme-sync@local", "strict_min_version": "115.0" }
+  },
+  "permissions": ["theme", "nativeMessaging"],
+  "background": { "scripts": ["background.js"] }
+}

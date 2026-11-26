@@ -19,7 +19,8 @@ or `qs ipc call theme set <id>` / `next` / `prev`.
 ```
 themes/
 ├── theme                 the script (Python 3.11+, no dependencies)
-├── firefox-setup.sh      prepares Firefox profiles once
+├── firefox-setup.sh      prepares Firefox profiles once (CSS, extension, native host)
+├── firefox/              Theme Sync extension + its native messaging host
 ├── zsh/theme.zsh-theme   oh-my-zsh theme reading current/zsh.zsh
 ├── templates/            one file per application, rendered into current/
 ├── <id>/colors.toml      the theme's palette
@@ -42,7 +43,7 @@ running applications:
 | Zed         | `~/.config/zed/themes/theme.json` (copy of `current/zed.json`), theme "Theme" in settings.json | Zed watches its themes directory |
 | btop        | `~/.config/btop/themes/theme.theme`, `color_theme = "theme"` | SIGUSR2 (re-reads btop.conf)          |
 | fuzzel      | `current/fuzzel.ini` (`include=` in fuzzel.ini) | on every launch                       |
-| Firefox     | `chrome/userChrome.css`, `userContent.css`, `user.js` of profiles prepared by `firefox-setup.sh` | when Firefox restarts |
+| Firefox     | theme API colors from the Theme Sync extension (`firefox/`); `userChrome.css` only reads Firefox's theme variables | live: the extension's native host watches `current/palette.json` |
 
 ## Creating a theme
 
@@ -80,7 +81,9 @@ The Violet wallpapers are recolored with `walls/violet/recolor.sh` (same idea as
 
 `current/` isn't versioned: run `~/.config/themes/theme set orange-black` once. Without it,
 Quickshell and Neovim fall back to Orange Black, but sway, GTK and alacritty have no colors.
-For Firefox, also run `~/.config/themes/firefox-setup.sh`. For zsh:
+For Firefox, also run `~/.config/themes/firefox-setup.sh`, restart Firefox once and enable
+"Theme Sync" when it asks. The extension is unsigned: `user.js` sets
+`xpinstall.signatures.required=false`, which only Firefox ESR, Developer Edition and Nightly honor. For zsh:
 
 ```sh
 ln -s ~/.config/themes/zsh/theme.zsh-theme ~/.oh-my-zsh/custom/themes/theme.zsh-theme

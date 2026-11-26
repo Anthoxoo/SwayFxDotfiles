@@ -1,0 +1,90 @@
+#!/usr/bin/env python3
+"""Native messaging host for the Theme Sync Firefox extension.
+
+Sends a theme (theme API format) built from ~/.config/themes/current/palette.json at startup,
+then again whenever the file is replaced. Waits on inotify, so it costs nothing while idle,
+and exits when Firefox closes its stdin.
+"""
+
+import ctypes
+import json
+import os
+import select
+import struct
+import sys
+from pathlib import Path
+
+CURRENT = Path.home() / ".config/themes/current"
+PALETTE = CURRENT / "palette.json"
+
+IN_CLOSE_WRITE, IN_MOVED_TO, IN_CREATE = 0x8, 0x80, 0x100
+
+
+def theme(p):
+    bg, fg, field, border = p["background"], p["foreground"], p["field"], p["border"]
+    acc, muted, hover = p["accent"], p["muted"], p["hover"]
+    return {
+        "colors": {
+            "frame": bg, "frame_inactive": bg,
+            "tab_background_text": muted, "tab_selected": field, "tab_text": fg,
+            "tab_line": acc, "tab_loading": acc, "tab_background_separator": border,
+            "toolbar": bg, "toolbar_text": fg,
+            "toolbar_top_separator": border, "toolbar_bottom_separator": border,
+            "toolbar_vertical_separator": border,
+            "toolbar_field": field, "toolbar_field_text": fg, "toolbar_field_border": border,
+            "toolbar_field_focus": bg, "toolbar_field_text_focus": fg,
+            "toolbar_field_border_focus": acc,
+            "toolbar_field_highlight": acc, "toolbar_field_highlight_text": p["accent_fg"],
+            "button_background_hover": field, "button_background_active": hover,
+            "icons": fg, "icons_attention": acc,
+            "popup": bg, "popup_text": fg, "popup_border": acc,
+            "popup_highlight": field, "popup_highlight_text": acc,
+            "sidebar": bg, "sidebar_text": fg, "sidebar_border": border,
+            "sidebar_highlight": field, "sidebar_highlight_text": acc,
+            "ntp_background": bg, "ntp_card_background": field, "ntp_text": fg,
+        },
+        "properties": {"color_scheme": "dark", "content_color_scheme": "dark"},
+    }
+
+
+def send(msg):
+    data = json.dumps(msg).encode()
+    sys.stdout.buffer.write(struct.pack("@I", len(data)) + data)
+    sys.stdout.buffer.flush()
+
+
+def send_current(last):
+    try:
+        p = json.loads(PALETTE.read_text())
+        t = theme(p)
+    except (OSError, ValueError, KeyError):
+        return last
+    if t != last:
+        send(t)
+    return t
+
+
+def main():
+    libc = ctypes.CDLL(None, use_errno=True)
+    fd = libc.inotify_init1(os.O_CLOEXEC)
+    CURRENT.mkdir(parents=True, exist_ok=True)
+    libc.inotify_add_watch(fd, str(CURRENT).encode(), IN_CLOSE_WRITE | IN_MOVED_TO | IN_CREATE)
+    last = send_current(None)
+    stdin = sys.stdin.fileno()
+    while True:
+        ready, _, _ = select.select([fd, stdin], [], [])
+        if stdin in ready and not os.read(stdin, 65536):
+            return  # Firefox closed the pipe
+        if fd in ready:
+            buf = os.read(fd, 4096)
+            names, i = [], 0
+            while i < len(buf):
+                _, _, _, n = struct.unpack_from("iIII", buf, i)
+                names.append(buf[i + 16:i + 16 + n].rstrip(b"\0"))
+                i += 16 + n
+            if b"palette.json" in names:
+                last = send_current(last)
+
+
+if __name__ == "__main__":
+    main()
