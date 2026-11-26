@@ -252,6 +252,7 @@ FIREFOX = {
 
 def firefox_profiles():
     for base in (Path.home() / ".mozilla/firefox",
+                 Path.home() / ".config/mozilla/firefox",  # XDG layout (recent Firefox)
                  Path.home() / ".var/app/org.mozilla.firefox/.mozilla/firefox"):
         if base.is_dir():
             for prof in base.iterdir():

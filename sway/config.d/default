@@ -56,8 +56,8 @@ set $file-manager nautilus
     # Reload the configuration file
     bindsym $mod+Shift+c reload
 
-    # Launch Obsidian
-    bindsym $mod+s exec flatpak run md.obsidian.Obsidian
+    # Launch Obsidian (native package on the desktop, Flatpak on the laptop)
+    bindsym $mod+s exec sh -c 'command -v obsidian >/dev/null && exec obsidian || exec flatpak run md.obsidian.Obsidian'
 
 # Resize mode
 mode "resize" {

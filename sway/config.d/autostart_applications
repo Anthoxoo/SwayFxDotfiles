@@ -8,6 +8,10 @@ exec ~/.config/sway/scripts/polkit-agent.sh
 # Autotiling — une seule instance (exec, pas exec_always : sinon une de plus à chaque reload)
 exec autotiling
 
+# OpenTabletDriver (desktop): its user service waits for graphical-session.target, which
+# sway never reaches, so start it here. No-op where the service isn't installed.
+exec sh -c 'systemctl --user cat opentabletdriver.service >/dev/null 2>&1 && exec systemctl --user start opentabletdriver.service'
+
 # Quickshell : barre, lanceur, menus, notifications, OSD, verrouillage
 exec_always ~/.config/quickshell/scripts/start-quickshell.sh
 

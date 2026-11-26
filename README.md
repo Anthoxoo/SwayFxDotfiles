@@ -81,9 +81,12 @@ cd ~/Development/SwayFxDotfiles
 
 - **Login screen**: `sudo cp -r sddm-theme /usr/share/sddm/themes/omarchy`, then
   `/etc/sddm.conf.d/theme.conf` with `[Theme]` and `Current=omarchy`.
+  With ly instead (desktop): `sudo ~/.config/themes/ly-setup.sh` recolors the console palette
+  from the current theme at every boot, so ly follows the theme (see `themes/README.md`).
 - **Firefox / Zen**: `~/.config/themes/firefox-setup.sh` (see `themes/README.md`). The live theme
   extension is signed by Mozilla (`themes/firefox/theme-sync.xpi`), so it loads in Firefox
-  and Zen alike; Zen only gets the extension, not the userChrome.
+  and Zen alike. Zen ignores most of the theme API, so it gets its own userChrome
+  (`themes/firefox/zen-userChrome.css`) instead of Firefox's.
 - **AirPods**: `librepods/install.sh` (see `librepods/README.md`).
 - **Calendar** (optional): private files, never committed — `quickshell/ical.conf` and
   `quickshell/google-oauth-client.json`.
@@ -94,11 +97,13 @@ No per-machine branches: the differences live in the shared files.
 
 - `sway/config.d/output`: both machines' screens by connector name (sway ignores outputs that
   aren't plugged in). `swaymsg -t get_outputs` lists the names.
-- `sway/config.d/input`: the OpenTabletDriver tablet is mapped to the desktop's `DP-1`.
+- `sway/config.d/input`: the OpenTabletDriver tablet is mapped to the desktop's `DP-1`;
+  `config.d/autostart_applications` starts its user service where it is installed.
 - `sway/scripts/polkit-agent.sh`: finds the polkit agent wherever the distro puts it.
 - `sway/scripts/launch-first.sh`: `Super+B` opens Zen if installed, else Firefox; `Super+V`
   opens `zed` (or `zeditor`, its name on Arch).
 - `.zshrc`: `LIBVA_DRIVER_NAME=iHD` (Intel) only on the laptop (`$HOST == T490`).
+- `Super+S` opens Obsidian: the native package if installed (desktop), else the Flatpak.
 - Quickshell hides the battery module on machines without a battery.
 
 ## Updating the repo

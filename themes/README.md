@@ -20,6 +20,7 @@ or `qs ipc call theme set <id>` / `next` / `prev`.
 themes/
 ├── theme                 the script (Python 3.11+, no dependencies)
 ├── firefox-setup.sh      prepares Firefox profiles once (CSS, extension, native host)
+├── ly-setup.sh           ly / text consoles follow the theme (run once with sudo)
 ├── firefox/              Theme Sync extension + its native messaging host
 ├── zsh/theme.zsh-theme   oh-my-zsh theme reading current/zsh.zsh
 ├── templates/            one file per application, rendered into current/
@@ -43,7 +44,9 @@ running applications:
 | Zed         | `~/.config/zed/themes/theme.json` (copy of `current/zed.json`), theme "Theme" in settings.json | Zed watches its themes directory |
 | btop        | `~/.config/btop/themes/theme.theme`, `color_theme = "theme"` | SIGUSR2 (re-reads btop.conf)          |
 | fuzzel      | `current/fuzzel.ini` (`include=` in fuzzel.ini) | on every launch                       |
+| ly, consoles | `current/vtrgb` (16-color console palette; accent in slot 11), applied by `console-theme.service` from `ly-setup.sh` | at the next boot |
 | Firefox     | theme API colors from the Theme Sync extension (`firefox/`); `userChrome.css` only reads Firefox's theme variables | live: the extension's native host watches `current/palette.json` |
+| Zen         | the same extension; `firefox/zen-userChrome.css` maps Zen's `--zen-*` variables onto the theme API ones | live, like Firefox |
 
 ## Creating a theme
 
@@ -86,8 +89,11 @@ and enable "Theme Sync" when it asks. The extension is signed by Mozilla (unlist
 published): `firefox/theme-sync.xpi` loads in any Firefox-based browser. After changing the
 extension, bump `version` in `firefox/extension/manifest.json` and run `firefox/sign.py`
 (asks for AMO API credentials from https://addons.mozilla.org/developers/addon/api/key/);
-until then `firefox-setup.sh` falls back to an unsigned build. In Zen only the extension is
-installed (no userChrome). For zsh:
+until then `firefox-setup.sh` falls back to an unsigned build. Zen drops extension themes by
+default and paints its interface from its own variables (workspace gradient), so in Zen
+profiles `firefox-setup.sh` sets `zen.theme.disable-lightweight` to false in `user.js` and
+installs `firefox/zen-userChrome.css` instead of Firefox's userChrome: it maps Zen's variables
+onto the theme API ones the extension sets, live, and only while that theme is applied. For zsh:
 
 ```sh
 ln -s ~/.config/themes/zsh/theme.zsh-theme ~/.oh-my-zsh/custom/themes/theme.zsh-theme

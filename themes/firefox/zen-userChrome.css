@@ -1,0 +1,48 @@
+/* Zen: follows the global theme (~/.config/themes) live.
+ *
+ * Zen paints its interface from its own variables (--zen-*, set from the workspace gradient)
+ * and ignores most of the theme API. With zen.theme.disable-lightweight off (Zen drops every
+ * extension theme otherwise; firefox-setup.sh sets it in user.js), the Theme Sync extension's
+ * theme applies, so Firefox sets the theme API variables on the window: this file maps Zen's
+ * variables onto the ones Zen doesn't override, and a theme switch recolors Zen at once.
+ * Only active while an extension theme is applied (:root[lwtheme]): without Theme Sync,
+ * Zen keeps its own look.
+ *
+ * Installed by ../firefox-setup.sh as chrome/userChrome.css of every Zen profile (Firefox's
+ * userChrome would break Zen's layout). userChrome is a user sheet: !important beats Zen's
+ * stylesheets and the values its scripts set inline.
+ */
+
+:root[lwtheme] {
+  /* Theme API variables, as sent by firefox/theme-sync-host */
+  --ts-bg: var(--lwt-accent-color);            /* frame       = background */
+  --ts-fg: var(--panel-text-color);            /* popup_text  = foreground */
+  --ts-accent: var(--lwt-tab-line-color);      /* tab_line    = accent */
+  --ts-border: var(--toolbar-field-border-color);
+  --ts-field: color-mix(in srgb, var(--ts-fg) 7%, var(--ts-bg));
+
+  /* Zen derives its whole palette from these two */
+  --zen-primary-color: var(--ts-accent) !important;
+  --zen-branding-bg: var(--ts-bg) !important;
+
+  --zen-main-browser-background: var(--ts-bg) !important;
+  --zen-main-browser-background-toolbar: var(--ts-bg) !important;
+  --toolbox-textcolor: var(--ts-fg) !important;
+  --toolbar-color-scheme: dark !important;
+  --zen-colors-border: var(--ts-border) !important;
+  --zen-dialog-background: var(--ts-bg) !important;
+  --zen-urlbar-background: var(--ts-field) !important;
+  --toolbar-field-background-color: var(--ts-field) !important;
+  --toolbar-field-focus-background-color: var(--ts-field) !important;
+  --toolbar-field-color: var(--ts-fg) !important;
+  --arrowpanel-background: var(--ts-bg) !important;
+  --arrowpanel-color: var(--ts-fg) !important;
+}
+
+/* Zen's scripts set the workspace gradient inline on these two elements */
+:root[lwtheme] :is(#zen-browser-background, #zen-toolbar-background) {
+  --zen-main-browser-background: var(--ts-bg) !important;
+  --zen-main-browser-background-toolbar: var(--ts-bg) !important;
+  --zen-main-browser-background-old: var(--ts-bg) !important;
+  --zen-main-browser-background-toolbar-old: var(--ts-bg) !important;
+}

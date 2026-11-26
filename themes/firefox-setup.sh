@@ -5,7 +5,8 @@
 #  - every Firefox and Zen profile gets the Theme Sync extension
 #    (extensions/theme-sync@local.xpi, sideloaded: the browser asks to enable it at the next
 #    start) and its native host, which push the colors live
-# Zen keeps its own interface: only the extension, no userChrome (it would fight Zen's layout).
+#  - every Zen profile gets firefox/zen-userChrome.css, which maps Zen's own colors onto the
+#    theme (Firefox's userChrome would fight Zen's layout)
 # Needs a browser restart once; afterwards theme switches apply without restarting.
 set -euo pipefail
 
@@ -16,7 +17,9 @@ signed="$here/firefox/theme-sync.xpi"
 profiles_in() {  # profile directories (those with a prefs.js) under the given roots
     find "$@" -mindepth 1 -maxdepth 2 -name prefs.js -printf '%h\n' 2>/dev/null || true
 }
-mapfile -t firefox < <(profiles_in "$HOME/.mozilla/firefox" "$HOME/.var/app/org.mozilla.firefox/.mozilla/firefox")
+# Firefox: ~/.mozilla (classic) or ~/.config/mozilla (XDG layout of recent versions, e.g. Arch)
+mapfile -t firefox < <(profiles_in "$HOME/.mozilla/firefox" "$HOME/.config/mozilla/firefox" \
+    "$HOME/.var/app/org.mozilla.firefox/.mozilla/firefox")
 mapfile -t zen < <(profiles_in "$HOME/.zen" "$HOME/.config/zen" \
     "$HOME/.var/app/app.zen_browser.zen/.zen" "$HOME/.var/app/app.zen_browser.zen/zen")
 if [ ${#firefox[@]} -eq 0 ] && [ ${#zen[@]} -eq 0 ]; then
@@ -48,11 +51,35 @@ for profile in "${firefox[@]}"; do
     mkdir -p "$profile/chrome"
 done
 
-# Native messaging host: Firefox reads ~/.mozilla/native-messaging-hosts; Zen has used
-# ~/.zen and ~/.config/zen depending on its version, so the manifest goes in every one that
-# exists. (Flatpak browsers would need the portal: not handled.)
+# Zen drops every extension theme by default (zen.theme.disable-lightweight) and ignores most
+# of the theme API anyway: the pref lets Theme Sync's theme through, and Zen's own userChrome
+# maps Zen's variables onto the theme API ones (live). Zen only reads userChrome.css with the
+# legacy stylesheets pref on. A userChrome.css that doesn't come from here is kept as .bak.
+zen_prefs=(
+    'toolkit.legacyUserProfileCustomizations.stylesheets|true'
+    'zen.theme.disable-lightweight|false'
+)
+for profile in "${zen[@]}"; do
+    mkdir -p "$profile/chrome"
+    css="$profile/chrome/userChrome.css"
+    if [ -f "$css" ] && ! grep -q 'Zen: follows the global theme' "$css"; then
+        mv "$css" "$css.bak"
+    fi
+    install -m644 "$here/firefox/zen-userChrome.css" "$css"
+    touch "$profile/user.js"
+    for p in "${zen_prefs[@]}"; do
+        name=${p%%|*}
+        sed -i "/user_pref(\"${name//./\\.}\",/d" "$profile/user.js"  # same pref, other value
+        echo "user_pref(\"$name\", ${p#*|});" >> "$profile/user.js"
+    done
+done
+
+# Native messaging host: Firefox reads ~/.mozilla/native-messaging-hosts (or
+# ~/.config/mozilla/native-messaging-hosts with the XDG layout); Zen has used ~/.zen and
+# ~/.config/zen depending on its version, so the manifest goes in every one that exists.
+# (Flatpak browsers would need the portal: not handled.)
 host_dirs=("$HOME/.mozilla/native-messaging-hosts")
-for d in "$HOME/.zen" "$HOME/.config/zen"; do
+for d in "$HOME/.config/mozilla" "$HOME/.zen" "$HOME/.config/zen"; do
     [ -d "$d" ] && host_dirs+=("$d/native-messaging-hosts")
 done
 for host_dir in "${host_dirs[@]}"; do
