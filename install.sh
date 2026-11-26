@@ -24,9 +24,31 @@ sync() {  # sync <source> <destination dir> <backup subdir>
         "$1" "$2" | grep -vE '^(\.|cd)' || true
 }
 
+# A config directory that is a symlink (e.g. into an old clone) would be written through
+for c in "${configs[@]}"; do
+    if [ -L "$HOME/.config/$c" ]; then
+        echo "!! ~/.config/$c is a symlink to $(readlink "$HOME/.config/$c"): replace it with a" \
+            "real directory first (mv it away), then run this again." >&2
+        exit 1
+    fi
+done
+
 for c in "${configs[@]}"; do
     echo "== ~/.config/$c"
     sync "$repo/$c/" "$HOME/.config/$c/" ".config/$c"
+done
+
+# sway includes every file of config.d/: one left over from an older setup (hyprlock, a
+# waybar bar...) would stay active, so files the repo doesn't have go to the backup.
+for f in "$HOME/.config/sway/config.d/"*; do
+    [ -e "$f" ] || continue
+    name=$(basename "$f")
+    [ -e "$repo/sway/config.d/$name" ] && continue
+    echo "stale sway/config.d/$name -> backup"
+    if [ ${#dry[@]} -eq 0 ]; then
+        mkdir -p "$backup/.config/sway/config.d"
+        mv "$f" "$backup/.config/sway/config.d/"
+    fi
 done
 
 echo "== ~/.zshrc"
