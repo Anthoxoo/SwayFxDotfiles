@@ -20,9 +20,9 @@ input type:pointer {
 #    natural_scroll enabled
 #}
 
-# Restreint la tablette gérée par OpenTabletDriver à l'écran DP-2
+# OpenTabletDriver tablet (desktop) restricted to its monitor
 input "OpenTabletDriver Virtual Tablet" {
-    map_to_output DP-2
+    map_to_output DP-1
     accel_profile flat
 }
 

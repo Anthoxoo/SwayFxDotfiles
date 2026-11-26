@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Installe librepods (démon AirPods, fork embarqué dans omarchy-pods) avec le scan BLE par
 # fenêtres (10 s toutes les 5 min) au lieu d'un scan continu qui inonde BlueZ.
-# Testé sur omarchy-pods f35dbc4. Dépendances Debian : cmake ninja-build qt6-base-dev
+# Testé sur omarchy-pods f35dbc4.
+# Dépendances Arch/CachyOS : cmake ninja qt6-base qt6-connectivity qt6-declarative qt6-tools libpulse pkgconf
+# Dépendances Debian : cmake ninja-build qt6-base-dev
 # qt6-connectivity-dev qt6-declarative-dev qt6-tools-dev libpulse-dev pkgconf
 set -euo pipefail
 

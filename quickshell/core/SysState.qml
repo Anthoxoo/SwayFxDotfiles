@@ -616,6 +616,8 @@ Singleton {
     // =====================================================================
     readonly property var batDevice: UPower.displayDevice
     readonly property bool batReady: root.batDevice ? root.batDevice.ready : false
+    // False on a desktop: the battery module and its alerts stay hidden
+    readonly property bool hasBattery: root.batReady && root.batDevice.isLaptopBattery
     readonly property int upPct: root.batReady ? Math.round(root.batDevice.percentage * 100) : 100
     readonly property int upState: root.batReady ? root.batDevice.state : UPowerDeviceState.Unknown
     readonly property real upRate: root.batReady ? root.batDevice.changeRate : 0
@@ -647,7 +649,7 @@ Singleton {
     }
 
     function syncBattery() {
-        if (!root.batReady) return;
+        if (!root.hasBattery) return;
         let cap = root.upPct;
         let stEnum = root.upState;
         let st = "Discharging";

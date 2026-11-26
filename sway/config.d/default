@@ -17,10 +17,10 @@ set $launcher ~/.config/quickshell/scripts/toggle-launcher.sh
 set $powermenu ~/.config/quickshell/scripts/toggle-power.sh
 
 # Code Editor
-set $code-editor zed
+set $code-editor ~/.config/sway/scripts/launch-first.sh zed zeditor
 
 # Preferred Browser
-set $browser firefox
+set $browser ~/.config/sway/scripts/launch-first.sh zen-browser zen firefox firefox-esr
 
 # File manager
 set $file-manager nautilus

@@ -3,6 +3,7 @@ import "../core"
 
 Text {
     id: batRoot
+    visible: SysState.hasBattery
     property bool hovered: false
 
     text: SysState.batText
