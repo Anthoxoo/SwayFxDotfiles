@@ -1,13 +1,23 @@
 migration.sh
-quickshell/ical.conf
 __pycache__/
-quickshell/google-oauth-client.json
 *.bak
 themes/current/
 zed/themes/theme.json
 btop/themes/theme.theme
 .DS_Store
-# Credentials never go in the repo
+# Private data and credentials: never in the repo (it is public)
+ical.conf
+*.ics
+google-oauth-client.json
+client_secret*.json
+*token*.json
 *creds*
 *credentials*
 *secret*
+*.pem
+*.key
+.env
+*.env
+# Runtime state written by Quickshell (reminders, agenda cache, tokens)
+reminders.json
+agenda.json
