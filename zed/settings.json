@@ -81,7 +81,7 @@
   "theme": {
     "mode": "dark",
     "light": "One Dark",
-    "dark": "Orange Black"
+    "dark": "Theme"
   },
   "tab_bar": {
     "show": false

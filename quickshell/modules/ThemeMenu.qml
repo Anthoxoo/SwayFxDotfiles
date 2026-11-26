@@ -27,10 +27,16 @@ PanelWindow {
     property int selectedIndex: 0
     readonly property var themes: Theme.available
 
+    function selectCurrent() {
+        selectedIndex = Math.max(0, themes.findIndex(t => t.id === Theme.themeId));
+    }
+    // La liste est relue à chaque ouverture (nouveaux thèmes) : resélectionner le thème actif
+    onThemesChanged: if (visible) selectCurrent()
+
     onVisibleChanged: {
         if (!visible) return;
         Theme.refreshList();
-        selectedIndex = Math.max(0, themes.findIndex(t => t.id === Theme.themeId));
+        selectCurrent();
         keyCatcher.forceActiveFocus();
         focusRetry.restart();
     }

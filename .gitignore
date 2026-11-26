@@ -4,3 +4,5 @@ __pycache__/
 quickshell/google-oauth-client.json
 *.bak
 themes/current/
+zed/themes/theme.json
+btop/themes/theme.theme

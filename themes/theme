@@ -9,7 +9,7 @@ Un thème = un dossier ~/.config/themes/<id>/ contenant :
 
 `theme set <id>` génère ~/.config/themes/current/ :
   palette.json    toutes les couleurs résolues (lu par Quickshell et Neovim)
-  sway.conf, alacritty.toml, gtk-3.0.css, gtk-4.0.css   rendus depuis templates/
+  sway.conf, alacritty.toml, gtk-3.0.css, gtk-4.0.css, zed.json, btop.theme   rendus depuis templates/
 puis applique le thème aux applications déjà ouvertes.
 
 Templates : {{ cle }} -> #rrggbb, {{ cle_strip }} -> rrggbb, {{ cle_rgb }} -> r, g, b
@@ -103,6 +103,7 @@ def resolve(tid, raw):
     put(ui, "disabled", mix(fg, bg, 0.5))
     put(ui, "placeholder", mix(fg, bg, 0.56))
     # états
+    put(ui, "field", p["row_hover"])  # champs de saisie, onglet actif (Firefox)
     put(ui, "accent_fg", bg)
     put(ui, "urgent", p["color1"])
     put(ui, "warning", p["color3"])
@@ -130,6 +131,7 @@ def resolve(tid, raw):
     put(syn, "comment", p["disabled"])
     put(syn, "line_nr", mix(fg, bg, 0.65))
     put(syn, "guide_active", p["color8"])
+    put(syn, "special", p["color11"])  # 2e couleur chaude (Zed : fichiers renommés, curseurs)
     # fonds pré-mélangés (nvim n'a pas de canal alpha)
     put(syn, "visual", over(acc, bg, 0.24))
     put(syn, "search", over(p["warning"], bg, 0.25))
@@ -140,6 +142,13 @@ def resolve(tid, raw):
     put(syn, "diff_text", over(acc, bg, 0.30))
     put(syn, "warning_bg", over(p["warning"], bg, 0.16))
     put(syn, "info_bg", over(p["success"], bg, 0.16))
+    put(syn, "special_bg", over(p["special"], bg, 0.16))
+    # bordures des badges d'état (Zed)
+    for k in ("accent", "urgent", "warning", "success", "special"):
+        put(syn, k + "_border", over(p[k], bg, 0.4))
+    # variantes atténuées des couleurs ANSI 0-7 (terminal de Zed)
+    for i in range(8):
+        put(syn, f"dim{i}", over(p[f"color{i}"], bg, 0.7))
 
     # --- GTK / icônes
     put(gtk, "gtk_theme", "adw-gtk3-dark" if dark else "adw-gtk3")
@@ -215,7 +224,46 @@ def build(tid):
     for name, text in rendered.items():
         write_atomic(CURRENT / name, text)
     write_atomic(CURRENT / "palette.json", json.dumps(p, indent=2) + "\n")
+    install()
     return p
+
+
+# Fichiers recopiés là où l'application les attend (elle ne sait pas lire current/) :
+# Zed charge tout ~/.config/zed/themes/*.json et recharge à chaud ; settings.json
+# pointe une fois pour toutes sur le thème "Theme".
+INSTALL = {
+    "zed.json": Path.home() / ".config/zed/themes/theme.json",
+    # btop.conf : color_theme = "theme"
+    "btop.theme": Path.home() / ".config/btop/themes/theme.theme",
+}
+
+
+# Firefox : seulement les profils déjà préparés par firefox-setup.sh (dossier chrome/ présent).
+# userChrome.css n'est relu qu'au démarrage de Firefox.
+FIREFOX = {
+    "firefox-userChrome.css": "chrome/userChrome.css",
+    "firefox-userContent.css": "chrome/userContent.css",
+    "firefox-user.js": "user.js",
+}
+
+
+def firefox_profiles():
+    for base in (Path.home() / ".mozilla/firefox",
+                 Path.home() / ".var/app/org.mozilla.firefox/.mozilla/firefox"):
+        if base.is_dir():
+            for prof in base.iterdir():
+                if (prof / "prefs.js").is_file() and (prof / "chrome").is_dir():
+                    yield prof
+
+
+def install():
+    for name, dest in INSTALL.items():
+        if (CURRENT / name).is_file() and dest.parent.is_dir():
+            write_atomic(dest, (CURRENT / name).read_text())
+    for prof in firefox_profiles():
+        for name, rel in FIREFOX.items():
+            if (CURRENT / name).is_file():
+                write_atomic(prof / rel, (CURRENT / name).read_text())
 
 
 def quiet(cmd):
@@ -241,6 +289,8 @@ def apply_live(p):
     quiet(gs + ["icon-theme", p["icon_theme"]])
     # Neovim : autocmd Signal SIGUSR1 -> recharge le colorscheme "theme"
     quiet(["pkill", "-USR1", "-x", "nvim"])
+    # btop : SIGUSR2 = relire btop.conf (et donc le thème)
+    quiet(["pkill", "-USR2", "-x", "btop"])
     # Quickshell et alacritty surveillent leurs fichiers : rien à faire
 
 

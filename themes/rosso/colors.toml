@@ -1,0 +1,48 @@
+# Rosso — rouge et brun chaud, tiré de ~/.config/walls/red-ish (Porco Rosso)
+name = "Rosso"
+mode = "dark"
+
+accent = "#d9443e"
+background = "#1a1216"
+foreground = "#e0d0ca"
+
+color0 = "#241a1e"
+color1 = "#d9443e"
+color2 = "#8f9a67"
+color3 = "#d9a55b"
+color4 = "#7a7aa8"
+color5 = "#b5707e"
+color6 = "#7fa3a0"
+color7 = "#d8c8c2"
+color8 = "#4a3a40"
+color9 = "#ef5f58"
+color10 = "#aab47c"
+color11 = "#e8bd76"
+color12 = "#9595c2"
+color13 = "#cc8a98"
+color14 = "#98bdb9"
+color15 = "#f2e6e1"
+
+[ui]
+inset = "#130d10"
+urgent = "#ef5f58"
+warning = "#e8bd76"
+success = "#98bdb9"
+
+[syntax]
+keyword = "#d9443e"
+function = "#e8bd76"
+type = "#cc8a98"
+string = "#aab47c"
+number = "#e0956a"
+regex = "#d9a55b"
+escape = "#e0956a"
+attribute = "#c9a99f"
+variable = "#d8c8c2"
+operator = "#b5707e"
+comment = "#7d6a70"
+special = "#e0956a"
+
+[gtk]
+icon_theme = "Papirus-Dark"
+gnome_accent = "red"

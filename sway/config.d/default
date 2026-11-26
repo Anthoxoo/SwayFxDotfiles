@@ -41,9 +41,6 @@ set $file-manager nautilus
     # Start your launcher
     bindsym $mod+d exec $launcher
 
-    # Activities
-    bindsym $mod+p exec ~/.config/sway/scripts/window_switcher.sh
-
     # Quickshell panels & TUI shortcuts
     bindsym $mod+Shift+w exec ~/.config/quickshell/scripts/toggle-wifi.sh
     bindsym $mod+Shift+b exec ~/.config/quickshell/scripts/toggle-bt.sh

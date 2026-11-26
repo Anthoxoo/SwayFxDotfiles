@@ -1,0 +1,210 @@
+/* Généré par ~/.config/themes/theme (template : templates/firefox-userChrome.css) */
+:root,
+#main-window,
+#navigator-toolbox {
+    --theme-bg: {{ background }};
+    --theme-bg-alt: {{ field }};
+    --theme-border: {{ border }};
+    --theme-fg: {{ foreground }};
+    --theme-muted: {{ muted }};
+    --theme-accent: {{ accent }};
+
+    --toolbar-bgcolor: {{ background }} !important;
+    --toolbar-color: {{ foreground }} !important;
+    --lwt-accent-color: {{ background }} !important;
+    --lwt-text-color: {{ foreground }} !important;
+    --lwt-header-image: none !important;
+    --lwt-additional-images: none !important;
+    --toolbar-field-background-color: {{ field }} !important;
+    --toolbar-field-color: {{ foreground }} !important;
+    --toolbar-field-border-color: {{ border }} !important;
+    --toolbar-field-focus-background-color: {{ background }} !important;
+    --toolbar-field-focus-color: {{ foreground }} !important;
+    --toolbar-field-focus-border-color: {{ accent }} !important;
+    --arrowpanel-background: {{ background }} !important;
+    --arrowpanel-color: {{ foreground }} !important;
+    --arrowpanel-border-color: {{ accent }} !important;
+    --arrowpanel-border-radius: 0px !important;
+    --tab-border-radius: 0px !important;
+    --toolbarbutton-border-radius: 0px !important;
+    --tabpanel-background-color: {{ background }} !important;
+}
+
+* {
+    font-family: "JetBrainsMono Nerd Font", monospace !important;
+    border-radius: 0px !important;
+}
+
+/* Masquer les boutons réduire / agrandir / fermer et les espaces vides associés */
+.titlebar-buttonbox-container,
+.titlebar-buttonbox,
+.titlebar-min,
+.titlebar-max,
+.titlebar-restore,
+.titlebar-close,
+.titlebar-spacer {
+    display: none !important;
+}
+
+/* Toutes les barres d'outils (Onglets, Navigation, Barre des favoris) */
+#navigator-toolbox,
+#titlebar,
+#TabsToolbar,
+#nav-bar,
+#PersonalToolbar,
+toolbar#PersonalToolbar,
+.browser-toolbar {
+    appearance: none !important;
+    -moz-default-appearance: none !important;
+    background: {{ background }} !important;
+    background-color: {{ background }} !important;
+    background-image: none !important;
+    color: {{ foreground }} !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+/* Onglets */
+.tabbrowser-tab {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.tabbrowser-tab .tab-background {
+    background: {{ background }} !important;
+    background-color: {{ background }} !important;
+    border: none !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+}
+
+.tabbrowser-tab:hover .tab-background:not([selected="true"]):not([visuallyselected="true"]) {
+    background: {{ field }} !important;
+    background-color: {{ field }} !important;
+}
+
+/* Onglet actif avec sa barre d'accent en bas */
+.tabbrowser-tab[selected="true"] .tab-background,
+.tabbrowser-tab[visuallyselected="true"] .tab-background,
+.tab-background[selected="true"],
+.tab-background[visuallyselected="true"] {
+    background: {{ field }} !important;
+    background-color: {{ field }} !important;
+    box-shadow: inset 0 -1px 0 0 {{ accent }} !important;
+}
+
+.tabbrowser-tab .tab-label {
+    color: {{ muted }} !important;
+}
+
+.tabbrowser-tab[selected="true"] .tab-label,
+.tabbrowser-tab[visuallyselected="true"] .tab-label {
+    color: {{ foreground }} !important;
+    font-weight: bold !important;
+}
+
+/* Masquer le séparateur vertical entre les onglets */
+.tabbrowser-tab::after,
+.tabbrowser-tab::before {
+    border: none !important;
+    display: none !important;
+}
+
+/* Barre d'adresse (URL) */
+#nav-bar {
+    border-top: 1px solid {{ border }} !important;
+    border-bottom: 1px solid {{ border }} !important;
+}
+
+#urlbar-background,
+#searchbar {
+    appearance: none !important;
+    background: {{ field }} !important;
+    background-color: {{ field }} !important;
+    border: 1px solid {{ border }} !important;
+    box-shadow: none !important;
+}
+
+#urlbar[focused="true"] > #urlbar-background {
+    background-color: {{ background }} !important;
+    border: 1px solid {{ accent }} !important;
+    box-shadow: none !important;
+}
+
+.urlbarView {
+    background-color: {{ background }} !important;
+    color: {{ foreground }} !important;
+    border-top: 1px solid {{ accent }} !important;
+}
+
+.urlbarView-row[selected] {
+    background-color: {{ field }} !important;
+    color: {{ accent }} !important;
+}
+
+/* Barre des favoris (Bookmarks Toolbar sur l'écran Home) */
+toolbar#PersonalToolbar,
+#PersonalToolbar,
+#personal-bookmarks,
+#PlacesToolbar,
+#PlacesToolbarItems {
+    appearance: none !important;
+    -moz-default-appearance: none !important;
+    background: {{ background }} !important;
+    background-color: {{ background }} !important;
+    background-image: none !important;
+    color: {{ foreground }} !important;
+}
+
+toolbar#PersonalToolbar,
+#PersonalToolbar {
+    border-bottom: 1px solid {{ border }} !important;
+    padding: 2px 6px !important;
+}
+
+#PersonalToolbar toolbarbutton.bookmark-item,
+#PlacesToolbarItems > .bookmark-item {
+    appearance: none !important;
+    color: {{ foreground }} !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    padding: 3px 8px !important;
+    margin: 0 2px !important;
+}
+
+#PersonalToolbar toolbarbutton.bookmark-item:hover,
+#PersonalToolbar toolbarbutton.bookmark-item[open="true"],
+#PlacesToolbarItems > .bookmark-item:hover {
+    background-color: {{ field }} !important;
+    color: {{ accent }} !important;
+}
+
+/* Boutons d'outils & Menus */
+toolbar .toolbarbutton-1:hover > .toolbarbutton-icon,
+toolbar .toolbarbutton-1:hover > .toolbarbutton-badge-stack {
+    background-color: {{ field }} !important;
+    color: {{ accent }} !important;
+}
+
+menupopup,
+panel {
+    --panel-background: {{ background }} !important;
+    --panel-color: {{ foreground }} !important;
+    --panel-border-color: {{ accent }} !important;
+    --panel-border-radius: 0px !important;
+}
+
+menuitem:hover,
+menu:hover,
+menuitem[_moz-menuactive="true"],
+menu[_moz-menuactive="true"] {
+    background-color: {{ field }} !important;
+    color: {{ accent }} !important;
+}
+
+#sidebar-box,
+#sidebar-header {
+    background-color: {{ background }} !important;
+    color: {{ foreground }} !important;
+    border-color: {{ border }} !important;
+}
