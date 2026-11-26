@@ -81,9 +81,9 @@ cd ~/Development/SwayFxDotfiles
 
 - **Login screen**: `sudo cp -r sddm-theme /usr/share/sddm/themes/omarchy`, then
   `/etc/sddm.conf.d/theme.conf` with `[Theme]` and `Current=omarchy`.
-- **Firefox**: `~/.config/themes/firefox-setup.sh` (see `themes/README.md`). The live theme
-  extension is unsigned, so it only loads in Firefox ESR, Developer Edition and Nightly — not
-  in Firefox release or Zen.
+- **Firefox / Zen**: `~/.config/themes/firefox-setup.sh` (see `themes/README.md`). The live theme
+  extension is signed by Mozilla (`themes/firefox/theme-sync.xpi`), so it loads in Firefox
+  and Zen alike; Zen only gets the extension, not the userChrome.
 - **AirPods**: `librepods/install.sh` (see `librepods/README.md`).
 - **Calendar** (optional): private files, never committed — `quickshell/ical.conf` and
   `quickshell/google-oauth-client.json`.

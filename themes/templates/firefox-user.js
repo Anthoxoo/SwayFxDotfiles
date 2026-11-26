@@ -6,5 +6,5 @@ user_pref("browser.in-content.dark-mode", true);
 user_pref("browser.display.background_color", "{{ background }}");
 // Background of blank pages in dark mode (read at startup; new tabs use Theme Sync's live page)
 user_pref("browser.display.background_color.dark", "{{ background }}");
-// Theme Sync (~/.config/themes/firefox) is a local, unsigned extension: allowed on ESR only with this.
-user_pref("xpinstall.signatures.required", false);
+// Theme Sync is signed by Mozilla (firefox/sign.py): extension signatures stay required.
+user_pref("xpinstall.signatures.required", true);

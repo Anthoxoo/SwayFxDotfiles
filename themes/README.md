@@ -81,9 +81,13 @@ The Violet wallpapers are recolored with `walls/violet/recolor.sh` (same idea as
 
 `current/` isn't versioned: run `~/.config/themes/theme set orange-black` once. Without it,
 Quickshell and Neovim fall back to Orange Black, but sway, GTK and alacritty have no colors.
-For Firefox, also run `~/.config/themes/firefox-setup.sh`, restart Firefox once and enable
-"Theme Sync" when it asks. The extension is unsigned: `user.js` sets
-`xpinstall.signatures.required=false`, which only Firefox ESR, Developer Edition and Nightly honor. For zsh:
+For Firefox or Zen, also run `~/.config/themes/firefox-setup.sh`, restart the browser once
+and enable "Theme Sync" when it asks. The extension is signed by Mozilla (unlisted, never
+published): `firefox/theme-sync.xpi` loads in any Firefox-based browser. After changing the
+extension, bump `version` in `firefox/extension/manifest.json` and run `firefox/sign.py`
+(asks for AMO API credentials from https://addons.mozilla.org/developers/addon/api/key/);
+until then `firefox-setup.sh` falls back to an unsigned build. In Zen only the extension is
+installed (no userChrome). For zsh:
 
 ```sh
 ln -s ~/.config/themes/zsh/theme.zsh-theme ~/.oh-my-zsh/custom/themes/theme.zsh-theme
