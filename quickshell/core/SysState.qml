@@ -370,6 +370,7 @@ Singleton {
             // commande, lisible par tous dans /proc pendant l'exécution de nmcli
             let net = root.wifiNetworkByName(ssid);
             if (net) {
+                root.wifiPendingNet = net;
                 net.connectWithPsk(pwd);
             } else {
                 let escPwd = pwd.replace(/'/g, "'\\''");
@@ -380,6 +381,22 @@ Singleton {
         }
         reloadNetTimer.interval = 1800;
         reloadNetTimer.restart();
+    }
+
+    // Native connections (password over D-Bus) report failures like wifi-ctl.py does
+    property var wifiPendingNet: null
+    Connections {
+        target: root.wifiPendingNet
+        ignoreUnknownSignals: true
+        function onConnectionFailed(reason) {
+            let why = "connection failed";
+            if (reason === ConnectionFailReason.NoSecrets) why = "wrong password";
+            else if (reason === ConnectionFailReason.WifiAuthTimeout) why = "authentication timed out";
+            else if (reason === ConnectionFailReason.WifiNetworkLost) why = "network lost";
+            else if (reason === ConnectionFailReason.WifiClientFailed) why = "authentication failed";
+            let name = (root.wifiPendingNet ? root.wifiPendingNet.name : "").trim().replace(/'/g, "'\\''");
+            root.runCmd("notify-send -a Wi-Fi -i network-wireless 'Can'\\''t connect to " + name + "' '" + why + "'");
+        }
     }
 
     function wifiNetworkByName(ssid) {
