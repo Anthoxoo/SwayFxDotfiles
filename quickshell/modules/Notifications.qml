@@ -123,14 +123,17 @@ PanelWindow {
                         if (mouse.button === Qt.RightButton) {
                             card.modelData.dismiss();
                         } else if (mouse.button === Qt.LeftButton) {
-                            let acts = card.modelData.actions;
+                            // Invoking an action can close the notification (and destroy this card)
+                            // before the end of this handler: keep a reference, dismiss only if still there
+                            let notif = card.modelData;
+                            let acts = notif.actions;
                             for (let i = 0; i < acts.length; i++) {
                                 if (acts[i].identifier === "default") {
                                     acts[i].invoke();
                                     break;
                                 }
                             }
-                            card.modelData.dismiss();
+                            if (notif) notif.dismiss();
                         }
                     }
                 }
@@ -233,8 +236,9 @@ PanelWindow {
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
                                     onPressed: {
+                                        let notif = card.modelData;  // see the card's click above
                                         modelData.invoke();
-                                        card.modelData.dismiss();
+                                        if (notif) notif.dismiss();
                                     }
                                 }
                             }
