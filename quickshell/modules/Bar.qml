@@ -57,6 +57,7 @@ PanelWindow {
         Backlight { id: blModule }
         Audio { id: audioModule }
         Battery { id: batModule }
+        ColorPickerButton { id: pickModule }
         Tray {}
         Power {}
     }
@@ -71,6 +72,7 @@ PanelWindow {
         if (blModule.hovered && !SysState.brightnessMenuOpen) return SysState.brightTooltipHtml;
         if (audioModule.hovered && !SysState.audioMenuOpen) return SysState.audioTooltipHtml;
         if (batModule.hovered && !SysState.batteryMenuOpen) return SysState.batTooltipHtml;
+        if (pickModule.hovered && !Picker.active) return pickModule.tooltipHtml;
         return "";
     }
 
@@ -84,6 +86,7 @@ PanelWindow {
         if (blModule.hovered) return blModule;
         if (audioModule.hovered) return audioModule;
         if (batModule.hovered) return batModule;
+        if (pickModule.hovered) return pickModule;
         return null;
     }
 

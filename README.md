@@ -1,7 +1,7 @@
 # SwayFX dotfiles
 
 SwayFX desktop with a Quickshell shell (bar, launcher, menus, notifications, lock screen,
-OSDs) and a global theme switcher that recolors everything at once, then lets you pick one of
+OSDs, polkit agent, screenshot tool, color picker) and a global theme switcher that recolors everything at once, then lets you pick one of
 the theme's wallpapers (`Super+Shift+T`; `Super+Ctrl+W` for the wallpapers only).
 One config for both machines:
 
