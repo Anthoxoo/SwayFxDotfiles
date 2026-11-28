@@ -22,6 +22,7 @@ ShellRoot {
     BrightnessMenu {}
     OmaPodsMenu {}
     AudioMenu {}
+    MediaMenu {}
     BatteryMenu {}
     PowerMenu {}
     ThemeMenu {}

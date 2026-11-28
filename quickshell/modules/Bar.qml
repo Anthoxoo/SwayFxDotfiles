@@ -62,7 +62,7 @@ PanelWindow {
     }
 
     property string activeRightTooltip: {
-        if (mprisModule.hovered) return mprisModule.tooltipHtml;
+        if (mprisModule.hovered && !SysState.mediaMenuOpen) return mprisModule.tooltipHtml;
         if (remModule.hovered && !SysState.reminderOpen) return Reminders.tooltipHtml;
         if (wifiModule.hovered && !SysState.wifiMenuOpen) return SysState.wifiTooltipHtml;
         if (btModule.hovered && !SysState.btMenuOpen) return SysState.btTooltipHtml;

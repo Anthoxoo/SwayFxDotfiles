@@ -2,9 +2,12 @@ import QtQuick
 import Quickshell.Services.Mpris
 import "../core"
 
+// Media module of the bar: what plays (core/Media.qml picks the player).
+// Left click: media popup (modules/MediaMenu.qml) · middle click: play/pause · right click: next
+// · wheel: previous / next.
 Item {
     id: mprisRoot
-    property var player: Mpris.players.values.length > 0 ? Mpris.players.values[0] : null
+    readonly property var player: Media.player
     property bool hovered: false
 
     visible: player !== null
@@ -31,9 +34,8 @@ Item {
         let st = isPlaying ? "playing" : "paused";
         let tit = player.trackTitle || "-";
         let art = player.trackArtist || "-";
-        let src = (player.identity || "player").toLowerCase();
         return Theme.tipBlock([
-            Theme.tipTitle(iconStr + "  " + st + " (" + src + ")"),
+            Theme.tipTitle(iconStr + "  " + st + " (" + Media.playerName(player) + ")"),
             Theme.tipRow("title", tit),
             Theme.tipRow("artist", art)
         ]);
@@ -55,7 +57,7 @@ Item {
         font.family: Theme.fontMain
         font.pixelSize: 12
         font.italic: !parent.isPlaying
-        color: mprisMouse.containsMouse ? Theme.accent : (parent.isPlaying ? Theme.fg : Theme.muted)
+        color: mprisMouse.containsMouse || SysState.mediaMenuOpen ? Theme.accent : (parent.isPlaying ? Theme.fg : Theme.muted)
     }
 
     Rectangle {
@@ -70,7 +72,7 @@ Item {
         id: mprisMouse
         anchors.fill: parent
         hoverEnabled: true
-        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
         cursorShape: Qt.PointingHandCursor
         onEntered: mprisHoverTimer.restart()
         onExited: {
@@ -80,12 +82,25 @@ Item {
         onPressed: mouse => {
             mprisHoverTimer.stop();
             mprisRoot.hovered = false;
-            if (mouse.button === Qt.LeftButton) SysState.runCmd("playerctl play-pause");
-            else if (mouse.button === Qt.RightButton) SysState.runCmd("playerctl next");
+            let p = mprisRoot.player;
+            if (!p) return;
+            if (mouse.button === Qt.LeftButton) {
+                let next = !SysState.mediaMenuOpen;
+                SysState.closeAllPopups();
+                // The popup centers itself under this module
+                SysState.mediaMenuX = mprisRoot.mapToItem(null, mprisRoot.width / 2, 0).x;
+                SysState.mediaMenuOpen = next;
+            } else if (mouse.button === Qt.MiddleButton) {
+                p.togglePlaying();
+            } else if (p.canGoNext) {
+                p.next();
+            }
         }
         onWheel: wheel => {
-            if (wheel.angleDelta.y > 0) SysState.runCmd("playerctl previous");
-            else SysState.runCmd("playerctl next");
+            let p = mprisRoot.player;
+            if (!p) return;
+            if (wheel.angleDelta.y > 0 && p.canGoPrevious) p.previous();
+            else if (wheel.angleDelta.y < 0 && p.canGoNext) p.next();
         }
     }
 }
