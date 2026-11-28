@@ -6,3 +6,4 @@ singleton Reminders 1.0 Reminders.qml
 singleton Agenda 1.0 Agenda.qml
 singleton Media 1.0 Media.qml
 singleton Picker 1.0 Picker.qml
+singleton Tailnet 1.0 Tailnet.qml

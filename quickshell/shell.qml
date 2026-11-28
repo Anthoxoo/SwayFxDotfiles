@@ -23,6 +23,7 @@ ShellRoot {
     OmaPodsMenu {}
     AudioMenu {}
     MediaMenu {}
+    TailscaleMenu {}
     BatteryMenu {}
     PowerMenu {}
     ThemeMenu {}

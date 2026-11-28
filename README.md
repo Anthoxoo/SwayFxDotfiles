@@ -1,7 +1,7 @@
 # SwayFX dotfiles
 
 SwayFX desktop with a Quickshell shell (bar, launcher, menus, notifications, lock screen,
-OSDs, polkit agent, screenshot tool, color picker) and a global theme switcher that recolors everything at once, then lets you pick one of
+OSDs, polkit agent, screenshot tool, color picker, Tailscale menu) and a global theme switcher that recolors everything at once, then lets you pick one of
 the theme's wallpapers (`Super+Shift+T`; `Super+Ctrl+W` for the wallpapers only).
 One config for both machines:
 
@@ -55,6 +55,8 @@ On Debian, `adw-gtk3-dark` lives in `~/.local/share/themes` and JetBrainsMono Ne
 from nerdfonts.com. `fuzzel` is optional: only the unbound `sway/scripts/power_menu.sh` uses it.
 Quickshell is the polkit agent; `polkit-kde-agent` (or `polkit-gnome`) is only a fallback, started
 if Quickshell can't register as the agent.
+Tailscale is optional: its bar icon shows up when the `tailscale` CLI is installed. To turn it
+on/off from the menu without root, run once `sudo tailscale set --operator=$USER`.
 
 Everyday apps: `firefox vlc drawing discord localsend libreoffice github-cli steam gamescope
 gamemode ruff flatpak`, then `flatpak install obsidian deezer`, and Rust with

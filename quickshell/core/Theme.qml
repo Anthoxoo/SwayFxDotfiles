@@ -143,7 +143,8 @@ Singleton {
     }
     // "label   value" line (label padded to `width` characters)
     function tipRow(label, value, width) {
-        return tipSpan(muted, String(label).padEnd(width || 8, " ")) + tipSpan(fg, value);
+        // &nbsp;: rich text collapses plain spaces, which would undo the padding
+        return tipSpan(muted, String(label).padEnd(width || 8, " ").replace(/ /g, "&nbsp;")) + tipSpan(fg, value);
     }
     // Multi-line monospace block
     function tipBlock(lines) {

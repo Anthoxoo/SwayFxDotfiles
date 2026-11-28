@@ -51,6 +51,7 @@ PanelWindow {
         Mpris { id: mprisModule }
         ReminderBadge { id: remModule }
         Wifi { id: wifiModule }
+        Tailscale { id: tsModule }
         Bluetooth { id: btModule }
         OmaPods { id: podsModule }
         Monitors { id: monModule }
@@ -66,6 +67,7 @@ PanelWindow {
         if (mprisModule.hovered && !SysState.mediaMenuOpen) return mprisModule.tooltipHtml;
         if (remModule.hovered && !SysState.reminderOpen) return Reminders.tooltipHtml;
         if (wifiModule.hovered && !SysState.wifiMenuOpen) return SysState.wifiTooltipHtml;
+        if (tsModule.hovered && !SysState.tailscaleMenuOpen) return tsModule.tooltipHtml;
         if (btModule.hovered && !SysState.btMenuOpen) return SysState.btTooltipHtml;
         if (podsModule.hovered && !SysState.podsMenuOpen) return SysState.podsTooltipHtml;
         if (monModule.hovered && !SysState.monitorsMenuOpen) return SysState.monitorsTooltipHtml;
@@ -80,6 +82,7 @@ PanelWindow {
         if (mprisModule.hovered) return mprisModule;
         if (remModule.hovered) return remModule;
         if (wifiModule.hovered) return wifiModule;
+        if (tsModule.hovered) return tsModule;
         if (btModule.hovered) return btModule;
         if (podsModule.hovered) return podsModule;
         if (monModule.hovered) return monModule;

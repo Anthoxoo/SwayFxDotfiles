@@ -85,7 +85,8 @@ PanelWindow {
                 event.accepted = true;
             } else if (event.key === Qt.Key_Tab) {
                 SysState.wifiMenuOpen = false;
-                SysState.btMenuOpen = true;
+                if (Tailnet.installed) SysState.tailscaleMenuOpen = true;
+                else SysState.btMenuOpen = true;
                 event.accepted = true;
             }
         }

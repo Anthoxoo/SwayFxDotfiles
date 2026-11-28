@@ -80,6 +80,7 @@ Singleton {
     property bool themeMenuWalls: false   // the theme menu opens on the current theme's wallpapers
     property bool mediaMenuOpen: false
     property real mediaMenuX: -1           // center of the bar's media module (popup anchor), -1: right edge
+    property bool tailscaleMenuOpen: false
     property bool dndMode: false
     property bool screenLocked: false
     property bool lockSecure: false          // vrai quand sway confirme le verrou (ext-session-lock)
@@ -113,7 +114,7 @@ Singleton {
             pods: "podsMenuOpen", wifi: "wifiMenuOpen", bt: "btMenuOpen", audio: "audioMenuOpen",
             battery: "batteryMenuOpen", monitors: "monitorsMenuOpen", calendar: "calendarMenuOpen",
             reminder: "reminderOpen", theme: "themeMenuOpen", wallpaper: "themeMenuOpen",
-            media: "mediaMenuOpen"
+            media: "mediaMenuOpen", tailscale: "tailscaleMenuOpen"
         })[name];
         if (!prop) return false;
         let next = !root[prop];
@@ -1140,6 +1141,7 @@ Singleton {
         root.reminderOpen = false;
         root.themeMenuOpen = false;
         root.mediaMenuOpen = false;
+        root.tailscaleMenuOpen = false;
     }
 
     function launchApp(appId, execCmd, isTerm) {
