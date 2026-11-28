@@ -57,7 +57,9 @@ clean_dead_instances ""
     last=""
     while true; do
         clean_dead_instances "$last"
-        quickshell >>/tmp/quickshell.log 2>&1 &
+        # Lighter Qt Quick, still 60 fps: one render thread for every window instead of one each
+        # (basic), and images dropped from RAM once they're on the GPU (transient)
+        QSG_RENDER_LOOP=basic QSG_TRANSIENT_IMAGES=1 quickshell >>/tmp/quickshell.log 2>&1 &
         qpid=$!
         wait "$qpid"
         # Instance qui vient de s'arrêter : son journal est gardé jusqu'au prochain arrêt
