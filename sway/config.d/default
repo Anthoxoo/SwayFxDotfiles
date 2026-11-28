@@ -210,8 +210,9 @@ bindsym $mod+r mode "resize"
     bindsym $mod+Shift+s exec ~/.config/sway/scripts/screenshot.sh region
 
 #
-# Fond d'écran (Quickshell) :
+# Wallpaper (Quickshell): picker on the current theme's wallpapers, next / previous one
 #
+    bindsym $mod+Ctrl+w exec qs ipc call shell toggle wallpaper
     bindsym $mod+Ctrl+space exec qs ipc call wallpaper next
     bindsym $mod+Ctrl+Shift+space exec qs ipc call wallpaper prev
 

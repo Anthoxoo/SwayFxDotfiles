@@ -1,7 +1,8 @@
 # SwayFX dotfiles
 
 SwayFX desktop with a Quickshell shell (bar, launcher, menus, notifications, lock screen,
-OSDs) and a global theme switcher that recolors everything at once (`Super+Shift+T`).
+OSDs) and a global theme switcher that recolors everything at once, then lets you pick one of
+the theme's wallpapers (`Super+Shift+T`; `Super+Ctrl+W` for the wallpapers only).
 One config for both machines:
 
 - **laptop**: ThinkPad T490, Debian 13
@@ -34,7 +35,7 @@ CachyOS / Arch (`paru` also handles the AUR ones):
 paru -S swayfx quickshell swayidle autotiling alacritty polkit-kde-agent xorg-xwayland \
     pipewire pipewire-pulse wireplumber bluez bluez-utils networkmanager upower power-profiles-daemon \
     brightnessctl playerctl wlsunset grim slurp swappy wl-clipboard libnotify jq curl rsync \
-    python uv zsh neovim zed btop nautilus gvfs \
+    python uv zsh neovim zed btop nautilus gvfs imagemagick \
     papirus-icon-theme adw-gtk-theme breeze ttf-jetbrains-mono-nerd noto-fonts \
     sddm xdg-desktop-portal-wlr xdg-desktop-portal-gtk
 ```
@@ -46,7 +47,7 @@ from their install scripts, the rest from apt:
 sudo apt install swayidle autotiling alacritty polkit-kde-agent-1 xwayland \
     pipewire-pulse wireplumber bluez network-manager upower power-profiles-daemon \
     brightnessctl playerctl wlsunset grim slurp swappy wl-clipboard libnotify-bin jq curl rsync \
-    zsh btop nautilus gvfs papirus-icon-theme breeze-cursor-theme fonts-noto sddm \
+    zsh btop nautilus gvfs imagemagick papirus-icon-theme breeze-cursor-theme fonts-noto sddm \
     xdg-desktop-portal-wlr xdg-desktop-portal-gtk
 ```
 

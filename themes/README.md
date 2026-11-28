@@ -11,8 +11,11 @@ btop, fuzzel, Firefox, wallpaper). Dark themes only.
 ~/.config/themes/theme apply          # re-render the current theme (after editing a template)
 ```
 
-Picker in Quickshell: `Super+Shift+T` (↑/↓ or j/k to choose, Enter to apply, Esc to close),
-or `qs ipc call theme set <id>` / `next` / `prev`.
+Picker in Quickshell, in two steps: `Super+Shift+T` lists the themes (↑/↓ or j/k to choose),
+Enter applies one and replaces the list with that theme's wallpapers (arrows or h/j/k/l to
+choose, Enter to apply, Backspace back to the themes). Esc closes. `Super+Ctrl+W` opens straight
+on the current theme's wallpapers. Without the picker: `qs ipc call theme set <id>` / `next` /
+`prev`, and `qs ipc call wallpaper set <path>` / `next` / `prev`.
 
 ## Layout
 
@@ -35,7 +38,7 @@ running applications:
 | Application | Reads                                     | Reload                                 |
 |-------------|-------------------------------------------|----------------------------------------|
 | Quickshell  | `current/palette.json` (`core/Theme.qml`) | file watch                             |
-| Wallpaper   | the theme's `backgrounds` (`core/Wallpapers.qml`) | first wallpaper of the theme; `Super+Ctrl+Space` cycles the theme's wallpapers |
+| Wallpaper   | the theme's `backgrounds` (`core/Wallpapers.qml`) | the wallpaper last picked with that theme (its first one the first time); `Super+Ctrl+Space` cycles the theme's wallpapers |
 | sway        | `current/sway.conf` (included by `sway/config.d/theme`) | `swaymsg client.*` (no reload, which would restart Quickshell) |
 | GTK 3 / 4   | `current/gtk-3.0.css`, `gtk-4.0.css` (imported by `~/.config/gtk-*/gtk.css`) | gsettings: GTK theme, color-scheme, accent, icons |
 | alacritty   | `current/alacritty.toml` (`general.import`) | alacritty hot reload                  |
@@ -79,7 +82,9 @@ An unknown key aborts the render before anything is written.
 | violet       | violet | near-black with a violet accent |
 | monochrome   | grey   | cool greys |
 
-Each theme's wallpapers are in `walls/<id>/` (same name as the theme). Themes named after a
+Each theme's wallpapers are in `walls/<id>/` (same name as the theme): a new image dropped
+there shows up in the picker (its thumbnail is made by `quickshell/scripts/wall-thumbs.py`, with
+ImageMagick or else Pillow, cached in `~/.cache/quickshell/wallthumbs`). Themes named after a
 known color scheme use its real palette; the others are named after the closest theme plus
 what changes (`red-black` is Orange Black in red). Renamed ids still work: `kanagawa` → `nord`,
 `rosso` → `red-black` (`RENAMED` in the script).
