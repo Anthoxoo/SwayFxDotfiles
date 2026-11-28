@@ -32,7 +32,7 @@ Kept for reference, not deployed: `hypr/`, `hyprshade/`, `waybar/`, `mako/`, `ki
 CachyOS / Arch (`paru` also handles the AUR ones):
 
 ```sh
-paru -S swayfx quickshell swayidle autotiling alacritty polkit-kde-agent xorg-xwayland \
+paru -S swayfx quickshell swayidle autotiling alacritty xorg-xwayland \
     pipewire pipewire-pulse wireplumber bluez bluez-utils networkmanager upower power-profiles-daemon \
     brightnessctl playerctl wlsunset grim slurp swappy wl-clipboard libnotify jq curl rsync \
     python uv zsh neovim zed btop nautilus gvfs imagemagick \
@@ -44,7 +44,7 @@ Debian 13: SwayFX, Quickshell and Neovim are built from source (`/usr/local`), u
 from their install scripts, the rest from apt:
 
 ```sh
-sudo apt install swayidle autotiling alacritty polkit-kde-agent-1 xwayland \
+sudo apt install swayidle autotiling alacritty xwayland \
     pipewire-pulse wireplumber bluez network-manager upower power-profiles-daemon \
     brightnessctl playerctl wlsunset grim slurp swappy wl-clipboard libnotify-bin jq curl rsync \
     zsh btop nautilus gvfs imagemagick papirus-icon-theme breeze-cursor-theme fonts-noto sddm \
@@ -53,6 +53,8 @@ sudo apt install swayidle autotiling alacritty polkit-kde-agent-1 xwayland \
 
 On Debian, `adw-gtk3-dark` lives in `~/.local/share/themes` and JetBrainsMono Nerd Font comes
 from nerdfonts.com. `fuzzel` is optional: only the unbound `sway/scripts/power_menu.sh` uses it.
+Quickshell is the polkit agent; `polkit-kde-agent` (or `polkit-gnome`) is only a fallback, started
+if Quickshell can't register as the agent.
 
 Everyday apps: `firefox vlc drawing discord localsend libreoffice github-cli steam gamescope
 gamemode ruff flatpak`, then `flatpak install obsidian deezer`, and Rust with
@@ -100,7 +102,7 @@ No per-machine branches: the differences live in the shared files.
   aren't plugged in). `swaymsg -t get_outputs` lists the names.
 - `sway/config.d/input`: the OpenTabletDriver tablet is mapped to the desktop's `DP-1`;
   `config.d/autostart_applications` starts its user service where it is installed.
-- `sway/scripts/polkit-agent.sh`: finds the polkit agent wherever the distro puts it.
+- `sway/scripts/polkit-agent.sh`: the fallback polkit agent, found wherever the distro puts it.
 - `sway/scripts/launch-first.sh`: `Super+B` opens Zen if installed, else Firefox; `Super+V`
   opens `zed` (or `zeditor`, its name on Arch).
 - `.zshrc`: `LIBVA_DRIVER_NAME=iHD` (Intel) only on the laptop (`$HOST == T490`).

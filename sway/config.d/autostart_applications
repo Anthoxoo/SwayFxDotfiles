@@ -2,8 +2,8 @@
 exec systemctl --user import-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK XDG_CURRENT_DESKTOP
 exec dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK XDG_CURRENT_DESKTOP=sway
 
-# Polkit authentication agent (KDE or GNOME, whichever is installed)
-exec ~/.config/sway/scripts/polkit-agent.sh
+# Polkit authentication agent: Quickshell (modules/PolkitDialog.qml), which falls back to
+# sway/scripts/polkit-agent.sh (KDE or GNOME agent) if it can't register
 
 # Autotiling — une seule instance (exec, pas exec_always : sinon une de plus à chaque reload)
 exec autotiling
