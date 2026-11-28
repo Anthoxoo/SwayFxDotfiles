@@ -34,7 +34,7 @@ CachyOS / Arch (`paru` also handles the AUR ones):
 ```sh
 paru -S swayfx quickshell swayidle autotiling alacritty xorg-xwayland \
     pipewire pipewire-pulse wireplumber bluez bluez-utils networkmanager upower power-profiles-daemon \
-    brightnessctl playerctl wlsunset grim slurp swappy wl-clipboard libnotify jq curl rsync \
+    brightnessctl playerctl wlsunset grim swappy wl-clipboard libnotify jq curl rsync \
     python uv zsh neovim zed btop nautilus gvfs imagemagick \
     papirus-icon-theme adw-gtk-theme breeze ttf-jetbrains-mono-nerd noto-fonts \
     sddm xdg-desktop-portal-wlr xdg-desktop-portal-gtk
@@ -46,7 +46,7 @@ from their install scripts, the rest from apt:
 ```sh
 sudo apt install swayidle autotiling alacritty xwayland \
     pipewire-pulse wireplumber bluez network-manager upower power-profiles-daemon \
-    brightnessctl playerctl wlsunset grim slurp swappy wl-clipboard libnotify-bin jq curl rsync \
+    brightnessctl playerctl wlsunset grim swappy wl-clipboard libnotify-bin jq curl rsync \
     zsh btop nautilus gvfs imagemagick papirus-icon-theme breeze-cursor-theme fonts-noto sddm \
     xdg-desktop-portal-wlr xdg-desktop-portal-gtk
 ```

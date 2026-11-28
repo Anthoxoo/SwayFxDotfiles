@@ -31,4 +31,5 @@ ShellRoot {
     ReminderPopup {}
     LockScreen {}
     PolkitDialog {}
+    Screenshot {}
 }

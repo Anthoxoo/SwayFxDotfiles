@@ -199,15 +199,17 @@ bindsym $mod+r mode "resize"
 #
 # Screenshots:
 #
-    # Tout est enregistré dans ~/Pictures/Screenshots et copié dans le presse-papiers
-    # Zone (+ annotation avec swappy s'il est installé)
-    bindsym Print exec ~/.config/sway/scripts/screenshot.sh region-edit
-    # Fenêtre
-    bindsym Ctrl+Print exec ~/.config/sway/scripts/screenshot.sh window
-    # Écran courant
+    # Saved in ~/Pictures/Screenshots and copied to the clipboard. The Quickshell overlay
+    # (modules/Screenshot.qml) freezes the screens: r / w / s switch region / window / screen,
+    # e toggles editing in swappy, Esc cancels.
+    # Region, then edit
+    bindsym Print exec qs ipc call screenshot open region true
+    # Window
+    bindsym Ctrl+Print exec qs ipc call screenshot open window false
+    # Focused screen, right away
     bindsym Shift+Print exec ~/.config/sway/scripts/screenshot.sh output
-    # Zone, sans éditeur
-    bindsym $mod+Shift+s exec ~/.config/sway/scripts/screenshot.sh region
+    # Region, no editing
+    bindsym $mod+Shift+s exec qs ipc call screenshot open region false
 
 #
 # Wallpaper (Quickshell): picker on the current theme's wallpapers, next / previous one
