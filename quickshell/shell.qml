@@ -32,4 +32,5 @@ ShellRoot {
     LockScreen {}
     PolkitDialog {}
     Screenshot {}
+    Autotiling {}
 }

@@ -32,7 +32,7 @@ Kept for reference, not deployed: `hypr/`, `hyprshade/`, `waybar/`, `mako/`, `ki
 CachyOS / Arch (`paru` also handles the AUR ones):
 
 ```sh
-paru -S swayfx quickshell swayidle autotiling alacritty xorg-xwayland \
+paru -S swayfx quickshell swayidle alacritty xorg-xwayland \
     pipewire pipewire-pulse wireplumber bluez bluez-utils networkmanager upower power-profiles-daemon \
     brightnessctl playerctl wlsunset grim swappy wl-clipboard libnotify jq curl rsync \
     python uv zsh neovim zed btop nautilus gvfs imagemagick \
@@ -44,7 +44,7 @@ Debian 13: SwayFX, Quickshell and Neovim are built from source (`/usr/local`), u
 from their install scripts, the rest from apt:
 
 ```sh
-sudo apt install swayidle autotiling alacritty xwayland \
+sudo apt install swayidle alacritty xwayland \
     pipewire-pulse wireplumber bluez network-manager upower power-profiles-daemon \
     brightnessctl playerctl wlsunset grim swappy wl-clipboard libnotify-bin jq curl rsync \
     zsh btop nautilus gvfs imagemagick papirus-icon-theme breeze-cursor-theme fonts-noto sddm \

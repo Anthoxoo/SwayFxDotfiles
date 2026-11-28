@@ -5,8 +5,7 @@ exec dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSO
 # Polkit authentication agent: Quickshell (modules/PolkitDialog.qml), which falls back to
 # sway/scripts/polkit-agent.sh (KDE or GNOME agent) if it can't register
 
-# Autotiling — une seule instance (exec, pas exec_always : sinon une de plus à chaque reload)
-exec autotiling
+# Autotiling: done by Quickshell (modules/Autotiling.qml), no daemon
 
 # OpenTabletDriver (desktop): its user service waits for graphical-session.target, which
 # sway never reaches, so start it here. No-op where the service isn't installed.
