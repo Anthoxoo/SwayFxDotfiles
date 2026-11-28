@@ -1,0 +1,62 @@
+# Nord — palette from arcticicestudio/nord (nord0-nord15)
+name = "Nord"
+
+accent = "#88c0d0"       # nord8, frost
+background = "#2e3440"   # nord0
+foreground = "#d8dee9"   # nord4
+
+color0 = "#3b4252"   # nord1
+color1 = "#bf616a"   # nord11
+color2 = "#a3be8c"   # nord14
+color3 = "#ebcb8b"   # nord13
+color4 = "#81a1c1"   # nord9
+color5 = "#b48ead"   # nord15
+color6 = "#88c0d0"   # nord8
+color7 = "#e5e9f0"   # nord5
+color8 = "#4c566a"   # nord3
+color9 = "#bf616a"
+color10 = "#a3be8c"
+color11 = "#ebcb8b"
+color12 = "#81a1c1"
+color13 = "#b48ead"
+color14 = "#8fbcbb"  # nord7
+color15 = "#eceff4"  # nord6
+
+selection_background = "#434c5e"  # nord2
+
+[ui]
+inset = "#242933"      # below nord0 (Nord's darker background in its ports)
+surface = "#3b4252"    # nord1
+row_hover = "#3b4252"
+hover = "#434c5e"      # nord2
+border = "#4c566a"     # nord3
+separator = "#4c566a"
+muted = "#616e88"      # nord3 bright (comments)
+disabled = "#4c566a"
+placeholder = "#616e88"
+urgent = "#bf616a"
+warning = "#ebcb8b"
+success = "#a3be8c"
+
+# Same roles as arcticicestudio/nord-vim
+[syntax]
+keyword = "#81a1c1"
+function = "#88c0d0"
+type = "#8fbcbb"
+string = "#a3be8c"
+number = "#b48ead"
+regex = "#ebcb8b"
+escape = "#ebcb8b"
+attribute = "#8fbcbb"
+variable = "#d8dee9"
+operator = "#81a1c1"
+punctuation = "#eceff4"
+bracket = "#eceff4"
+comment = "#616e88"
+line_nr = "#4c566a"
+visual = "#434c5e"
+special = "#d08770"    # nord12
+
+[gtk]
+icon_theme = "Papirus-Dark"
+gnome_accent = "teal"

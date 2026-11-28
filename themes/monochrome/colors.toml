@@ -1,4 +1,4 @@
-# Monochrome — cool greys, based on ~/.config/walls/black-white-ish/colors.toml
+# Monochrome — cool greys, based on ~/.config/walls/monochrome/colors.toml
 name = "Monochrome"
 
 accent = "#a8adb0"

@@ -6,7 +6,7 @@ btop, fuzzel, Firefox, wallpaper). Dark themes only.
 
 ```sh
 ~/.config/themes/theme list           # * = current theme
-~/.config/themes/theme set kanagawa
+~/.config/themes/theme set nord
 ~/.config/themes/theme next | prev
 ~/.config/themes/theme apply          # re-render the current theme (after editing a template)
 ```
@@ -67,15 +67,22 @@ An unknown key aborts the render before anything is written.
 
 ## Included themes
 
-| id           | Wallpapers (`walls/`) | Accent |
-|--------------|-----------------------|--------|
-| orange-black | orange-black          | orange |
-| gruvbox      | yellow-orange-ish     | yellow |
-| rosso        | red-ish               | red    |
-| kanagawa     | blue-ish              | blue   |
-| everforest   | green-nature          | green  |
-| violet       | violet                | violet |
-| monochrome   | black-white-ish       | grey   |
+| id           | Accent | Palette |
+|--------------|--------|---------|
+| orange-black | orange | the original theme |
+| red-black    | red    | Orange Black with a red accent (from the Porco Rosso wallpaper) |
+| green-black  | lime   | Orange Black with a lime accent |
+| gruvbox      | yellow | morhetz/gruvbox (dark) |
+| everforest   | green  | sainnhe/everforest (dark, medium) |
+| nord         | frost  | arcticicestudio/nord |
+| rose-pine    | love (pink) | rose-pine (main) |
+| violet       | violet | near-black with a violet accent |
+| monochrome   | grey   | cool greys |
+
+Each theme's wallpapers are in `walls/<id>/` (same name as the theme). Themes named after a
+known color scheme use its real palette; the others are named after the closest theme plus
+what changes (`red-black` is Orange Black in red). Renamed ids still work: `kanagawa` → `nord`,
+`rosso` → `red-black` (`RENAMED` in the script).
 
 The Violet wallpapers are recolored with `walls/violet/recolor.sh` (same idea as
 `walls/orange-black/recolor.sh`).

@@ -1,5 +1,5 @@
-# Rosso — red and warm brown, taken from ~/.config/walls/red-ish (Porco Rosso)
-name = "Rosso"
+# Red Black — near-black with a red accent, in the spirit of Orange Black (colors taken from the Porco Rosso wallpaper in walls/red-black)
+name = "Red Black"
 
 accent = "#d9443e"
 background = "#1a1216"

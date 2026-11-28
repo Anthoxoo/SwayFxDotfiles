@@ -162,7 +162,7 @@ locale `cachyOS-config` peut être supprimée **après** l'étape 0.
   d'utilisateur diffère.
 - **Fonds d'écran.** Les anciens fichiers de `~/.config/walls/<dossier>` restent en place, et
   Quickshell fait défiler tout le dossier du thème. Des doublons peuvent apparaître (par
-  exemple `yellow-orange-ish/gruvbox-mountain.png` et `wall_secondary.png`) : signale-les
+  exemple `gruvbox/gruvbox-mountain.png` et `wall_secondary.png`) : signale-les
   seulement.
 
 ## 4. Session sway
@@ -194,8 +194,9 @@ locale `cachyOS-config` peut être supprimée **après** l'étape 0.
 ## 5. Thème global
 
 - **Le moteur :** `~/.config/themes/theme` (`list | current | set <id> | next | prev | apply`),
-  documenté dans `themes/README.md`. Sept thèmes, tous sombres : orange-black, gruvbox, rosso,
-  kanagawa, everforest, violet, monochrome.
+  documenté dans `themes/README.md`. Neuf thèmes, tous sombres : orange-black, red-black, green-black,
+  gruvbox, everforest, nord, rose-pine, violet, monochrome (`kanagawa` et `rosso` ont été
+  renommés en `nord` et `red-black` ; les anciens noms marchent encore).
 - **GTK.** Vérifie que `gsettings get org.gnome.desktop.interface gtk-theme` donne
   `adw-gtk3-dark`, et `icon-theme` la valeur du thème courant.
 - **zsh.** oh-my-zsh doit être dans `~/.oh-my-zsh`.

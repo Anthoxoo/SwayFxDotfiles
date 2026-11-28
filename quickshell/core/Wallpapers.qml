@@ -14,7 +14,7 @@ Singleton {
     readonly property string home: Quickshell.env("HOME")
     readonly property string wallsDir: home + "/.config/walls"
     readonly property string stateDir: (Quickshell.env("XDG_STATE_HOME") || (home + "/.local/state")) + "/quickshell"
-    readonly property string defaultWall: wallsDir + "/yellow-orange-ish/wall_secondary.png"
+    readonly property string defaultWall: wallsDir + "/gruvbox/wall_secondary.png"
     readonly property string dir: Theme.backgrounds !== "" ? Theme.backgrounds : wallsDir
 
     property string current: ""

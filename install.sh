@@ -51,6 +51,20 @@ for f in "$HOME/.config/sway/config.d/"*; do
     fi
 done
 
+# Renamed themes and wallpaper folders (kanagawa -> nord, rosso -> red-black, walls named
+# after colors -> walls named after their theme): old copies would show up again in the theme
+# picker, so they go to the backup too.
+legacy=(themes/kanagawa themes/rosso walls/yellow-orange-ish walls/green-nature walls/blue-ish
+    walls/red-ish walls/black-white-ish walls/other)
+for l in "${legacy[@]}"; do
+    [ -e "$HOME/.config/$l" ] || [ -L "$HOME/.config/$l" ] || continue
+    echo "renamed ~/.config/$l -> backup"
+    if [ ${#dry[@]} -eq 0 ]; then
+        mkdir -p "$backup/.config/$(dirname "$l")"
+        mv "$HOME/.config/$l" "$backup/.config/$l"
+    fi
+done
+
 echo "== ~/.zshrc"
 sync "$repo/.zshrc" "$HOME/" ""
 

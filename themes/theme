@@ -198,11 +198,16 @@ def themes():
                   if d.is_dir() and (d / "colors.toml").is_file())
 
 
+# Renamed themes: an old id (in current/palette.json, a script, another machine) still works
+RENAMED = {"kanagawa": "nord", "rosso": "red-black"}
+
+
 def current_id():
     try:
-        return json.loads((CURRENT / "palette.json").read_text())["id"]
+        tid = json.loads((CURRENT / "palette.json").read_text())["id"]
     except (OSError, ValueError, KeyError):
         return None
+    return RENAMED.get(tid, tid)
 
 
 def build(tid):
@@ -337,7 +342,7 @@ def main(argv):
         if cmd == "set":
             if not args:
                 raise SystemExit("usage: theme set <id>")
-            tid = args[0]
+            tid = RENAMED.get(args[0], args[0])
         elif cmd == "apply":
             tid = current_id() or "orange-black"
         else:
